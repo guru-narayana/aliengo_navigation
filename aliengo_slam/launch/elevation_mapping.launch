@@ -1,0 +1,13 @@
+<launch>
+
+  <node pkg="elevation_mapping" type="elevation_mapping" name="elevation_mapping" output="screen">
+    <rosparam command="load" file="$(find aliengo_slam)/config/elevation_maps_config/robot_elm.yaml" />
+    <rosparam command="load" file="$(find aliengo_slam)/config/elevation_maps_config/postprocessor_pipeline.yaml" />
+  </node>
+
+  <node pkg="elevation_mapping_demos" type="tf_to_pose_publisher.py" name="waffle_pose_publisher">
+    <param name="from_frame" type="string" value="world"/>
+    <param name="to_frame" type="string" value="base"/>
+  </node>
+
+</launch>

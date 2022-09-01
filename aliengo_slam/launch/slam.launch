@@ -1,0 +1,7 @@
+<launch>
+    <include file="$(find aliengo_slam)/launch/rtab_map.launch">   
+     </include>
+    <include file="$(find aliengo_slam)/launch/elevation_mapping.launch">   
+     </include>
+     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find aliengo_slam)/rviz/slam_with_elev.rviz" />
+</launch>
