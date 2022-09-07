@@ -6,7 +6,7 @@
   </node>
 
   <node pkg="elevation_mapping_demos" type="tf_to_pose_publisher.py" name="waffle_pose_publisher">
-    <param name="from_frame" type="string" value="map"/>
+    <param name="from_frame" type="string" value="world"/>
     <param name="to_frame" type="string" value="base"/>
   </node>
 

@@ -20,4 +20,4 @@ postprocessor_pipeline: # set by postprocessor_pipeline_name
   #  - name: delete_original_layers
   #    type: gridMapFilters/DeletionFilter
   #    params:
-  #      layers: [lowest_scan_point,sensor_x_at_lowest_scan, sensor_y_at_lowest_scan, sensor_z_at_lowest_scan] # List of layers.
+  #      layers: [lowest_scan_point,sensor_x_at_lowest_scan, sensor_y_at_lowest_scan, sensor_z_at_lowest_scan]

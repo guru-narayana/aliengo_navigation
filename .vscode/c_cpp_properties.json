@@ -1,52 +1,55 @@
 {
-  "configurations": [
-    {
-      "browse": {
-        "databaseFilename": "${default}",
-        "limitSymbolsToIncludedHeaders": false
-      },
-      "includePath": [
-        "/home/guru/catkin_ws/devel/include/**",
-        "/opt/ros/noetic/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/aliengo_gait_controller/include/**",
-        "/home/guru/catkin_ws/src/Aliengo_3dNav/aliengo_slam/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/combined_robot_hw/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/combined_robot_hw_tests/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/controller_interface/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/controller_manager/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/controller_manager_tests/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/elevation_mapping/elevation_mapping/include/**",
-        "/home/guru/catkin_ws/src/gazebo_ros_pkgs/gazebo_plugins/include/**",
-        "/home/guru/catkin_ws/src/gazebo_ros_pkgs/gazebo_ros/include/**",
-        "/home/guru/catkin_ws/src/gazebo_ros_pkgs/gazebo_ros_control/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/hardware_interface/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/joint_limits_interface/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/kindr/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/kindr_ros/kindr_ros/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/kindr_ros/kindr_rviz_plugins/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/message_logger/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/kindr_ros/multi_dof_joint_trajectory_rviz_plugins/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/rtab_map_depends/octomap_rviz_plugins/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/realsense_gazebo_custom/realsense_gazebo_plugin/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_bullet/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_eigen/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_geometry_msgs/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_kdl/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_msgs/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_ros/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_sensor_msgs/include/**",
-        "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/transmission_interface/include/**",
-        "/home/guru/catkin_ws/src/Aliengo_3dNav/unitree_ros-master/unitree_controller/include/**",
-        "/home/guru/catkin_ws/src/Aliengo_3dNav/unitree_ros-master/unitree_legged_control/include/**",
-        "/usr/include/**"
-      ],
-      "name": "ROS",
-      "intelliSenseMode": "gcc-x64",
-      "compilerPath": "/usr/bin/gcc",
-      "cStandard": "gnu11",
-      "cppStandard": "c++14"
-    }
-  ],
-  "version": 4
+    "configurations": [
+        {
+            "browse": {
+                "databaseFilename": "${default}",
+                "limitSymbolsToIncludedHeaders": false
+            },
+            "includePath": [
+                "/home/guru/catkin_ws/devel/include/**",
+                "/opt/ros/noetic/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/aliengo_gait_controller/include/**",
+                "/home/guru/catkin_ws/src/Aliengo_3dNav/aliengo_slam/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/combined_robot_hw/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/combined_robot_hw_tests/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/controller_interface/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/controller_manager/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/controller_manager_tests/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/elevation_mapping/elevation_mapping/include/**",
+                "/home/guru/catkin_ws/src/gazebo_ros_pkgs/gazebo_plugins/include/**",
+                "/home/guru/catkin_ws/src/gazebo_ros_pkgs/gazebo_ros/include/**",
+                "/home/guru/catkin_ws/src/gazebo_ros_pkgs/gazebo_ros_control/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/hardware_interface/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/joint_limits_interface/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/kindr/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/kindr_ros/kindr_ros/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/kindr_ros/kindr_rviz_plugins/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/message_logger/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/kindr_ros/multi_dof_joint_trajectory_rviz_plugins/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/rtab_map_depends/octomap_rviz_plugins/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/realsense_gazebo_custom/realsense_gazebo_plugin/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_bullet/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_eigen/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_geometry_msgs/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_kdl/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_msgs/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_ros/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/geometry2/tf2_sensor_msgs/include/**",
+                "/home/guru/catkin_ws/src/dependencies_cstm/ros_control-noetic-devel/transmission_interface/include/**",
+                "/home/guru/catkin_ws/src/Aliengo_3dNav/unitree_ros-master/unitree_controller/include/**",
+                "/home/guru/catkin_ws/src/Aliengo_3dNav/unitree_ros-master/unitree_legged_control/include/**",
+                "/home/guru/catkin_ws/src/aliengo_navigation/aliengo_footstep_planner/include/**",
+                "/usr/include/**",
+                "/opt/ros/noetic/include",
+                "/usr/include/eigen3"
+            ],
+            "name": "ROS",
+            "intelliSenseMode": "gcc-x64",
+            "compilerPath": "/usr/bin/gcc",
+            "cStandard": "gnu11",
+            "cppStandard": "c++14"
+        }
+    ],
+    "version": 4
 }
