@@ -25,10 +25,11 @@ extern vector<double> planar_cost;
 // Required data 
 extern GridMap global_map;
 extern double joystick_vals[];
+extern vector<vector<double>> current_robot_footsteps;
 
 // Plan functions 
 void plan_footsteps();
-void update_obstacle_cost();
+void check_collision();
 void update_planar_cost();
 
 #endif

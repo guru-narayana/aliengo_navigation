@@ -6,6 +6,7 @@
     "files.associations": {
         "unordered_map": "cpp",
         "unordered_set": "cpp",
-        "ostream": "cpp"
+        "ostream": "cpp",
+        "vector": "cpp"
     }
 }

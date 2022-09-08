@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
     genmsg
     roscpp
     std_msgs
+    aliengo_kindym
     tf
 )
 
@@ -20,3 +21,5 @@ include_directories(
 add_executable(odometry src/odometry.cpp)
 add_dependencies(odometry nav_msgs_generate_messages_cpp)
 target_link_libraries(odometry   ${catkin_LIBRARIES})
+add_executable(footstep_state_publisher src/footstep_current_state_node.cpp)
+target_link_libraries(footstep_state_publisher   ${catkin_LIBRARIES})

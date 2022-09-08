@@ -2,7 +2,7 @@
 <package format="2">
   <name>aliengo_utils</name>
   <version>0.0.0</version>
-  <description>The aliengo_utils package</description>
+  <description>The quad_utils package</description>
 
   <!-- One maintainer tag required, multiple allowed, one person per tag -->
   <!-- Example:  -->
