@@ -1,5 +1,5 @@
 # Robot.
-map_frame_id:                               world
+map_frame_id:                               map
 robot_base_frame_id:                        base
 robot_pose_with_covariance_topic:           /base_pose
 robot_pose_cache_size:                      200
