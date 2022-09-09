@@ -8,31 +8,27 @@ using namespace std;
 aliengo_msgs::quad_footstep foot_status;
 
 tf::StampedTransform FL_tf,FR_tf,RL_tf,RR_tf;
-bool FL_contact = true;
-bool FR_contact = true;
-bool RL_contact = true;
-bool RR_contact = true;
 
-void FL_contact_cb(const geometry_msgs::WrenchStamped::ConstPtr& msg){
-    if(msg->wrench.force.z > 10)FL_contact = true;
-    else FL_contact = false;
+void FL_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
+    if(msg->wrench.force.z > 10)foot_status.contact_state[0] = true;
+    else foot_status.contact_state[0] = false;
 }
-void FR_contact_cb(const geometry_msgs::WrenchStamped::ConstPtr& msg){
-    cout<<"working";
-    if(msg->wrench.force.z > 10) FR_contact = true;
-    else FR_contact = false;
+void FR_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
+    if(msg->wrench.force.z > 10) foot_status.contact_state[1] = true;
+    else foot_status.contact_state[1] = false;
 }
-void RL_contact_cb(const geometry_msgs::WrenchStamped::ConstPtr& msg){
-    if(msg->wrench.force.z > 10) RL_contact = true;
-    else RL_contact = false;
+void RL_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
+    if(msg->wrench.force.z > 10) foot_status.contact_state[2] = true;
+    else foot_status.contact_state[2] = false;
 }
-void RR_contact_cb(const geometry_msgs::WrenchStamped::ConstPtr& msg){
-    if(msg->wrench.force.z > 10) RR_contact = true;
-    else RR_contact = false;
+void RR_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
+    if(msg->wrench.force.z > 10) foot_status.contact_state[3] = true;
+    else foot_status.contact_state[3] = false;
 }
 int main(int argc,char** argv){
     ros::init(argc,argv,"footstep_state_publisher");
     ros::NodeHandle nh;
+    foot_status.contact_state = {true,true,true,true};
     
     ros::Subscriber FL_force = nh.subscribe("visual/FL_foot_contact/the_force", 1, FL_contact_cb);
     ros::Subscriber FR_force = nh.subscribe("visual/FR_foot_contact/the_force", 1, FR_contact_cb);
@@ -69,12 +65,9 @@ int main(int argc,char** argv){
             foot_status.RR.y = RR_tf.getOrigin().y();
             foot_status.RR.z = RR_tf.getOrigin().z() - foot_radius;
             
-            foot_status.FL_contact = FL_contact;
-            foot_status.FR_contact = FR_contact;
-            foot_status.RL_contact = RL_contact;
-            foot_status.RR_contact = RR_contact;
 
             foot_pub.publish(foot_status);
+
     
         }
         catch (tf::TransformException ex){
@@ -82,6 +75,7 @@ int main(int argc,char** argv){
         ros::Duration(1.0).sleep();
         }
         loop_rate.sleep();
+        ros::spinOnce();
 
     }
     return 0;
