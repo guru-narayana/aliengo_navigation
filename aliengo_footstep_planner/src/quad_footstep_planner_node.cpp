@@ -1,4 +1,4 @@
-#include "quad_footstep_planner.h"
+#include "aliengo_footstep_planner/quad_footstep_planner.h"
 #include <ros/ros.h>
 #include <sensor_msgs/Joy.h>
 
