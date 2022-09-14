@@ -124,7 +124,6 @@ int main(int argc, char** argv)
 
     
         plan_footsteps();
-
         collision_check(poly_pub);
         
         loop_rate.sleep();
