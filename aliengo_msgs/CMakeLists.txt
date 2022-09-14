@@ -13,6 +13,7 @@ find_package(catkin REQUIRED COMPONENTS
 add_message_files(
   FILES
   quad_footstep.msg
+  robot_state.msg
 )
 
 generate_messages(

@@ -4,4 +4,4 @@ geometry_msgs/Point FR
 geometry_msgs/Point RL
 geometry_msgs/Point RR
 # contact message order FL FR RL RR
-bool[] contact_state 
+bool[] contact_state

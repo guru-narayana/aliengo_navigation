@@ -16,6 +16,15 @@ extern int horizon_length;
 extern vector<double> robot_config; 
 extern double collision_rect_length;
 extern double collision_rect_width;
+extern double collision_point_height;
+extern double collision_threshold;
+extern double favoured_forward_vel;
+extern double max_forward_vel;
+extern double min_forward_vel;
+extern double min_angular_vel;
+extern double max_angular_vel;
+extern double base_pose_yaw;
+
 
 // result data
 extern vector<vector<double>> foot_steps;
@@ -23,13 +32,13 @@ extern bool collision_detected;
 extern vector<double> planar_cost;
 
 // Required data 
-extern GridMap global_map;
+extern GridMap elev_map;
 extern double joystick_vals[];
 extern vector<vector<double>> current_robot_footsteps;
 
 // Plan functions 
 void plan_footsteps();
-void check_collision();
-void update_planar_cost();
-
+void collision_check(ros::Publisher poly_pub);
+void update_planar_variance();
+void foot_end_points();
 #endif

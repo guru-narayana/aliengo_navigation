@@ -41,7 +41,7 @@ int main(int argc,char** argv){
 
     double foot_radius;
     nh.param("/robot_config/foot_radius",foot_radius,  0.0265);
-    ros::Rate loop_rate(1000);
+    ros::Rate loop_rate(10);
 
     while(ros::ok()){        
         try{
