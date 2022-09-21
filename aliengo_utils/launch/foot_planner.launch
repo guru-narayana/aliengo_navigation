@@ -1,0 +1,7 @@
+<launch>
+
+    <rosparam command="load" file="$(find aliengo_utils)/config/aliengo_footplan_params.yaml"/>
+    <rosparam command="load" file="$(find aliengo_utils)/config/robot_config.yaml"/>
+    <node pkg="aliengo_footstep_planner" type="quad_footstep_planner_node" name="Quad_footstep_planner_node"/>
+    
+</launch>

@@ -1,0 +1,14 @@
+Quad_footstep_planner:
+  Grid_map_topic : /elevation_mapping/elevation_map_raw
+  Grid_map_resolution : 0.03
+  visualize_plan : true
+  max_steplength : 0.17
+  min_steplength : 0.08
+  favoured_steplength : 0.1
+  resolution_steplength : 0.01
+  prefered_stepcostFactor : 0.4
+  obstacle_stepcostFactor : 0.6
+  using_joystick : true
+  joystick_topic : /joy
+  horizon_length : 13
+  foot_plan_horizon : 5

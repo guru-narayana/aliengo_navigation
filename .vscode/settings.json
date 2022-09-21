@@ -17,6 +17,11 @@
         "string": "cpp",
         "string_view": "cpp",
         "initializer_list": "cpp",
-        "regex": "cpp"
+        "regex": "cpp",
+        "cmath": "cpp",
+        "complex": "cpp",
+        "*.ipp": "cpp",
+        "random": "cpp",
+        "tuple": "cpp"
     }
 }

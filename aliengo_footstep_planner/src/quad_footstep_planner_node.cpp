@@ -12,19 +12,27 @@ double grid_map_resolution;
 double max_steplength;
 double min_steplength;
 double favoured_steplength;
+double resolution_steplength;
+double prefered_stepcostFactor;
+double obstacle_stepcostFactor;
+bool visualize_plan;
 int horizon_length;
+int steps_horizon;
 vector<double> robot_config = {0,0,0,0,0};
 double collision_rect_length;
 double collision_rect_width;
 double collision_point_height;
 double collision_threshold;
+double collision_free_threshold;
 double favoured_forward_vel;
 double max_forward_vel;
 double min_forward_vel;
 double min_angular_vel;
 double max_angular_vel;
 double base_pose_yaw;
-
+double base_pose_y;
+double base_pose_x;
+string robot_base_frame;
 
 string grid_map_topic;
 string joystick_topic;
@@ -44,6 +52,7 @@ void joy_cb(const sensor_msgs::Joy::ConstPtr& msg)
     joystick_vals[0] = msg->axes[0]; 
     joystick_vals[1] = msg->axes[1]; 
 }
+
 void gridmap_cb(const grid_map_msgs::GridMap& msg)
 {
     GridMapRosConverter::fromMessage(msg, elev_map);
@@ -74,17 +83,25 @@ void base_pose_cb(const geometry_msgs::PoseWithCovarianceStamped& msg){
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
     base_pose_yaw = yaw;
+    base_pose_x = msg.pose.pose.position.x;
+    base_pose_y = msg.pose.pose.position.y;
 }
+
 // user set params load function
 void get_params(ros::NodeHandle& nh){
     nh.param("Grid_map_topic", grid_map_topic, string("/elevation_mapping/elevation_map_raw"));
-    nh.param("Grid_map_resolution", grid_map_resolution, 0.05);
-    nh.param("max_steplength", max_steplength, 2*grid_map_resolution);
+    nh.param("Grid_map_resolution", grid_map_resolution, 0.03);
+    nh.param("visualize_plan", visualize_plan, true);
+    nh.param("max_steplength", max_steplength, 3*grid_map_resolution);
     nh.param("min_steplength", min_steplength, grid_map_resolution);
     nh.param("favoured_steplength", favoured_steplength, 2*grid_map_resolution);
+    nh.param("resolution_steplength", resolution_steplength, 0.01);
+    nh.param("prefered_stepcostFactor", prefered_stepcostFactor, 0.4);
+    nh.param("obstacle_stepcostFactor", obstacle_stepcostFactor, 0.6);
     nh.param("using_joystick", using_joystick, true);
     nh.param("joystick_topic", joystick_topic, string("/joy"));
     nh.param("horizon_length", horizon_length, 13);
+    nh.param("foot_plan_horizon", steps_horizon, 5);
     nh.param("/robot_config/base_length",robot_config[0], 0.2399*2);
     nh.param("/robot_config/base_width",robot_config[1], 0.051*2);
     nh.param("/robot_config/L1",robot_config[2],  0.083);
@@ -93,12 +110,13 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/collision_rect_length",collision_rect_length, 0.65);
     nh.param("/robot_config/collision_rect_width",collision_rect_width, 0.3);
     nh.param("/robot_config/collision_point_height",collision_point_height, 0.2);
-    nh.param("/robot_config/collision_threshold",collision_threshold, 99.5);
-
-    nh.param("/robot_config/max_forward_vel",max_forward_vel,  0.8);
+    nh.param("/robot_config/collision_threshold",collision_threshold, 20.5);
+    nh.param("/robot_config/collision_free_threshold",collision_free_threshold, 99.5);
+    nh.param("/robot_config/max_forward_vel",max_forward_vel,  0.5);
     nh.param("/robot_config/min_forward_vel",min_forward_vel,  -0.5);   // m/s
     nh.param("/robot_config/min_angular_vel",min_angular_vel, -0.872); // rad/s
     nh.param("/robot_config/max_angular_vel",max_angular_vel,  0.872);
+    nh.param("/robot_config/robot_base_frame",robot_base_frame,  string("/base"));
 }
 
 int main(int argc, char** argv)
@@ -114,6 +132,7 @@ int main(int argc, char** argv)
     
 
     ros::Publisher poly_pub = nh.advertise<geometry_msgs::PolygonStamped>("/poly",1);
+    ros::Publisher foot_marker_pub = nh.advertise<visualization_msgs::MarkerArray>("foot_visualization_marker", 1000);
 
     ros::Rate loop_rate(1000);
 
@@ -122,9 +141,7 @@ int main(int argc, char** argv)
         ros::spinOnce();
         if(map_available){
 
-    
-        plan_footsteps();
-        collision_check(poly_pub);
+        plan_footsteps(poly_pub,foot_marker_pub);
         
         loop_rate.sleep();
 

@@ -1,5 +1,0 @@
-Quad_footstep_planner:
-  Grid_map_topic: /elevation_map1
-  Grid_map_resolution: 3
-  max_steplength: 4
-  min_steplength: 6
