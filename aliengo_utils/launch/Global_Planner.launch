@@ -1,0 +1,8 @@
+<launch>
+  
+   <node pkg="move_base" type="move_base" name="move_base" output="screen">
+    <remap from="/map" to="/rtabmap/grid_map"/>
+    <rosparam file="$(find aliengo_utils)/config/global_planner.yaml" command="load" /> 
+    </node>
+
+</launch> 
