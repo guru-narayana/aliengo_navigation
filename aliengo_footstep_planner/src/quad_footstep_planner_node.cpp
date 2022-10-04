@@ -5,6 +5,7 @@
 #include <geometry_msgs/PolygonStamped.h>
 #include <geometry_msgs/Polygon.h>
 #include <geometry_msgs/PoseWithCovarianceStamped.h>
+#include <geometry_msgs/PoseStamped.h>
 #include <tf/tf.h>
 
 // foot_planning_node user set params
@@ -15,9 +16,13 @@ double favoured_steplength;
 double resolution_steplength;
 double prefered_stepcostFactor;
 double obstacle_stepcostFactor;
+double collision_costFactor;
+double global_costFactor;
 bool visualize_plan;
 int horizon_length;
 int steps_horizon;
+int vtheta_samples;
+int vx_samples;
 vector<double> robot_config = {0,0,0,0,0};
 double collision_rect_length;
 double collision_rect_width;
@@ -33,6 +38,7 @@ double base_pose_yaw;
 double base_pose_y;
 double base_pose_x;
 string robot_base_frame;
+string goal_topic;
 
 string grid_map_topic;
 string joystick_topic;
@@ -44,7 +50,10 @@ GridMap elev_map;
 double joystick_vals[] = {0.0,0.0};
 vector<vector<double>> current_robot_footsteps;
 bool map_available = false;
-
+ros::ServiceClient client;
+geometry_msgs::PoseStamped start;
+nav_msgs::GetPlan get_plan;
+bool recived_global_plan = false;
 
 // ROS callback Functions
 void joy_cb(const sensor_msgs::Joy::ConstPtr& msg)
@@ -85,7 +94,24 @@ void base_pose_cb(const geometry_msgs::PoseWithCovarianceStamped& msg){
     base_pose_yaw = yaw;
     base_pose_x = msg.pose.pose.position.x;
     base_pose_y = msg.pose.pose.position.y;
+    start.header = msg.header;
+    start.pose = msg.pose.pose;
 }
+
+void goal_pose_cb(const geometry_msgs::PoseStamped& goal){
+    recived_global_plan = true;
+    get_plan.request.start = start;
+    get_plan.request.goal = goal;
+    
+
+    if (!client.call(get_plan))
+    {
+        ROS_ERROR("Failed to call service make_plan");
+    }
+}
+
+
+
 
 // user set params load function
 void get_params(ros::NodeHandle& nh){
@@ -97,11 +123,16 @@ void get_params(ros::NodeHandle& nh){
     nh.param("favoured_steplength", favoured_steplength, 2*grid_map_resolution);
     nh.param("resolution_steplength", resolution_steplength, 0.01);
     nh.param("prefered_stepcostFactor", prefered_stepcostFactor, 0.4);
+    nh.param("collision_costFactor", collision_costFactor, 1.2);
+    nh.param("global_costFactor", global_costFactor, 0.4);
     nh.param("obstacle_stepcostFactor", obstacle_stepcostFactor, 0.6);
-    nh.param("using_joystick", using_joystick, true);
+    nh.param("using_joystick", using_joystick, false);
     nh.param("joystick_topic", joystick_topic, string("/joy"));
     nh.param("horizon_length", horizon_length, 13);
     nh.param("foot_plan_horizon", steps_horizon, 5);
+    nh.param("vx_samples", vx_samples, 5);
+    nh.param("vtheta_samples", vtheta_samples, 20);
+
     nh.param("/robot_config/base_length",robot_config[0], 0.2399*2);
     nh.param("/robot_config/base_width",robot_config[1], 0.051*2);
     nh.param("/robot_config/L1",robot_config[2],  0.083);
@@ -111,12 +142,13 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/collision_rect_width",collision_rect_width, 0.3);
     nh.param("/robot_config/collision_point_height",collision_point_height, 0.2);
     nh.param("/robot_config/collision_threshold",collision_threshold, 20.5);
-    nh.param("/robot_config/collision_free_threshold",collision_free_threshold, 99.5);
+    nh.param("/robot_config/collision_free_threshold",collision_free_threshold, 100.0);
     nh.param("/robot_config/max_forward_vel",max_forward_vel,  0.5);
     nh.param("/robot_config/min_forward_vel",min_forward_vel,  -0.5);   // m/s
     nh.param("/robot_config/min_angular_vel",min_angular_vel, -0.872); // rad/s
     nh.param("/robot_config/max_angular_vel",max_angular_vel,  0.872);
     nh.param("/robot_config/robot_base_frame",robot_base_frame,  string("/base"));
+    nh.param("goal_topic",goal_topic,  string("/aliengo_goal"));
 }
 
 int main(int argc, char** argv)
@@ -129,6 +161,10 @@ int main(int argc, char** argv)
     ros::Subscriber local_gridmap_sub = nh.subscribe(grid_map_topic, 1, gridmap_cb);
     ros::Subscriber FL_force = nh.subscribe("/Aliengo_foot_crntstate", 1, current_foot_st_cb);
     ros::Subscriber base_pose_sub = nh.subscribe("/base_pose", 1, base_pose_cb);
+    ros::Subscriber goal_pose_sub = nh.subscribe(goal_topic, 1, goal_pose_cb);
+
+
+    client = nh.serviceClient<nav_msgs::GetPlan>("/move_base/NavfnROS/make_plan");
     
 
     ros::Publisher poly_pub = nh.advertise<geometry_msgs::PolygonStamped>("/poly",1);
@@ -140,9 +176,9 @@ int main(int argc, char** argv)
     while (ros::ok()){
         ros::spinOnce();
         if(map_available){
-
+        ros::Time begin =ros::Time::now();
         plan_footsteps(poly_pub,foot_marker_pub);
-        
+        cout<<ros::Time::now()-begin<<endl;
         loop_rate.sleep();
 
     }}
