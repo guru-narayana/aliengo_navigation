@@ -6,6 +6,7 @@
 #include <visualization_msgs/MarkerArray.h>
 #include <geometry_msgs/PoseStamped.h>
 #include <nav_msgs/GetPlan.h>
+#include "aliengo_msgs/transition_foothold.h"
 
 using namespace std;
 using namespace grid_map;
@@ -21,6 +22,7 @@ extern double prefered_stepcostFactor;
 extern double obstacle_stepcostFactor;
 extern double collision_costFactor;
 extern double global_costFactor;
+extern double edge_costFactor;
 
 extern int horizon_length;
 extern int steps_horizon;
@@ -49,6 +51,7 @@ extern vector<vector<double>> foot_steps;
 extern bool collision_detected;
 extern vector<double> planar_cost;
 
+
 // Required data 
 extern GridMap elev_map;
 extern double joystick_vals[];
@@ -57,7 +60,7 @@ extern bool recived_global_plan;
 extern nav_msgs::GetPlan get_plan;
 
 // Plan functions 
-void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub);
+void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::Publisher next_step_pub);
 double collision_check(bool return_totalcost);
 void update_planar_variance();
 vector<vector<double>> foot_end_points();

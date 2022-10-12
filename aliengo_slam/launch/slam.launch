@@ -3,7 +3,5 @@
      </include>
     <include file="$(find aliengo_slam)/launch/elevation_mapping.launch">   
      </include>
-     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find aliengo_slam)/rviz/slam_with_elev.rviz">
-        <remap from="/move_base_simple/goal" to="/aliengo_goal"/>
-     </node>
+
 </launch>

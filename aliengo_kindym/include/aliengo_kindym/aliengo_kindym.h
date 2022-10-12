@@ -15,6 +15,11 @@ public:
     vector<double> Right_Leg_IK(vector<double> xyz_state);
     vector<double> Left_Leg_FK(vector<double> cjs);
     vector<double> Right_Leg_FK(vector<double> cjs);
+    vector<double> BaseToFL(vector<double> xyz_base);
+    vector<double> BaseToRL(vector<double> xyz_base);
+    vector<double> BaseToFR(vector<double> xyz_base);
+    vector<double> BaseToRR(vector<double> xyz_base);
+    
 };
 
 class quad_dym{

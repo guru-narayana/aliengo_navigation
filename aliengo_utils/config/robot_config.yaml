@@ -14,3 +14,4 @@ robot_config:
   min_angular_vel: -0.872
   max_angular_vel: 0.872
   robot_base_frame: base
+  foot_radius: 0.0265

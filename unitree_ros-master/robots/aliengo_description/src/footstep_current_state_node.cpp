@@ -51,19 +51,19 @@ int main(int argc,char** argv){
             listener.lookupTransform("/base", "/RR_foot",ros::Time(0), RR_tf);
             foot_status.FL.x = FL_tf.getOrigin().x();
             foot_status.FL.y = FL_tf.getOrigin().y();
-            foot_status.FL.z = FL_tf.getOrigin().z() - foot_radius;
+            foot_status.FL.z = FL_tf.getOrigin().z();
 
             foot_status.FR.x = FR_tf.getOrigin().x();
             foot_status.FR.y = FR_tf.getOrigin().y();
-            foot_status.FR.z = FR_tf.getOrigin().z() - foot_radius;
+            foot_status.FR.z = FR_tf.getOrigin().z();
 
             foot_status.RL.x = RL_tf.getOrigin().x();
             foot_status.RL.y = RL_tf.getOrigin().y();
-            foot_status.RL.z = RL_tf.getOrigin().z() - foot_radius;
+            foot_status.RL.z = RL_tf.getOrigin().z();
 
             foot_status.RR.x = RR_tf.getOrigin().x();
             foot_status.RR.y = RR_tf.getOrigin().y();
-            foot_status.RR.z = RR_tf.getOrigin().z() - foot_radius;
+            foot_status.RR.z = RR_tf.getOrigin().z();
             
 
             foot_pub.publish(foot_status);

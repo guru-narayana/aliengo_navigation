@@ -8,7 +8,13 @@ Quad_footstep_planner:
   resolution_steplength : 0.01
   prefered_stepcostFactor : 0.4
   obstacle_stepcostFactor : 0.6
+  collision_costFactor : 1.2
+  global_costFactor : 0.4
+  edge_costFactor : 10.0
   using_joystick : true
   joystick_topic : /joy
   horizon_length : 13
   foot_plan_horizon : 5
+  vx_samples : 5
+  vtheta_samples : 10
+  global_goal_topic : /aliengo_goal

@@ -4,5 +4,7 @@ geometry_msgs/Point FR
 geometry_msgs/Point RL
 geometry_msgs/Point RR
 
-# contact message order FL FR RL RR
-bool[] contact_state
+float64 velx
+float64 velw
+float64 Future_planarcost
+bool collision_halt

@@ -14,6 +14,7 @@ add_message_files(
   FILES
   quad_footstep.msg
   robot_state.msg
+  transition_foothold.msg
 )
 
 generate_messages(

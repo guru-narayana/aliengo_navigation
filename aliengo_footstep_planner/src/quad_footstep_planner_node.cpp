@@ -17,6 +17,7 @@ double resolution_steplength;
 double prefered_stepcostFactor;
 double obstacle_stepcostFactor;
 double collision_costFactor;
+double edge_costFactor;
 double global_costFactor;
 bool visualize_plan;
 int horizon_length;
@@ -109,10 +110,6 @@ void goal_pose_cb(const geometry_msgs::PoseStamped& goal){
         ROS_ERROR("Failed to call service make_plan");
     }
 }
-
-
-
-
 // user set params load function
 void get_params(ros::NodeHandle& nh){
     nh.param("Grid_map_topic", grid_map_topic, string("/elevation_mapping/elevation_map_raw"));
@@ -126,13 +123,14 @@ void get_params(ros::NodeHandle& nh){
     nh.param("collision_costFactor", collision_costFactor, 1.2);
     nh.param("global_costFactor", global_costFactor, 0.4);
     nh.param("obstacle_stepcostFactor", obstacle_stepcostFactor, 0.6);
-    nh.param("using_joystick", using_joystick, false);
+    nh.param("edge_costFactor", edge_costFactor, 10.0);
+    nh.param("using_joystick", using_joystick, true);
     nh.param("joystick_topic", joystick_topic, string("/joy"));
     nh.param("horizon_length", horizon_length, 13);
     nh.param("foot_plan_horizon", steps_horizon, 5);
     nh.param("vx_samples", vx_samples, 5);
     nh.param("vtheta_samples", vtheta_samples, 20);
-
+    nh.param("global_goal_topic",goal_topic,  string("/aliengo_goal"));
     nh.param("/robot_config/base_length",robot_config[0], 0.2399*2);
     nh.param("/robot_config/base_width",robot_config[1], 0.051*2);
     nh.param("/robot_config/L1",robot_config[2],  0.083);
@@ -148,7 +146,6 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/min_angular_vel",min_angular_vel, -0.872); // rad/s
     nh.param("/robot_config/max_angular_vel",max_angular_vel,  0.872);
     nh.param("/robot_config/robot_base_frame",robot_base_frame,  string("/base"));
-    nh.param("goal_topic",goal_topic,  string("/aliengo_goal"));
 }
 
 int main(int argc, char** argv)
@@ -169,6 +166,7 @@ int main(int argc, char** argv)
 
     ros::Publisher poly_pub = nh.advertise<geometry_msgs::PolygonStamped>("/poly",1);
     ros::Publisher foot_marker_pub = nh.advertise<visualization_msgs::MarkerArray>("foot_visualization_marker", 1000);
+    ros::Publisher next_foot_pub = nh.advertise<aliengo_msgs::transition_foothold >("transition_step_info", 1000);
 
     ros::Rate loop_rate(1000);
 
@@ -176,9 +174,7 @@ int main(int argc, char** argv)
     while (ros::ok()){
         ros::spinOnce();
         if(map_available){
-        ros::Time begin =ros::Time::now();
-        plan_footsteps(poly_pub,foot_marker_pub);
-        cout<<ros::Time::now()-begin<<endl;
+        plan_footsteps(poly_pub,foot_marker_pub,next_foot_pub);
         loop_rate.sleep();
 
     }}

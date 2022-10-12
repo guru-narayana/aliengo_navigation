@@ -66,7 +66,8 @@ vector<double> next_step(double R,double theta,double v,double w,double base_x,d
         double x1 = cos(yaw)*(x+base_x) - sin(yaw)*(y+base_y) + base_pose_x;
         double y1 = sin(yaw)*(x+base_x) + cos(yaw)*(y+base_y) + base_pose_y;
         double height = elev_map.atPosition("elevation_inpainted",Position(x1,y1));
-        double cost = height*obstacle_stepcostFactor + abs(SL-favoured_steplength)*prefered_stepcostFactor,obstacle_cost(0);
+        double surf_normal = sqrt( pow(elev_map.atPosition("normal_vectors_y",Position(x1,y1)),2) + pow(elev_map.atPosition("normal_vectors_x",Position(x1,y1)),2));
+        double cost = height*obstacle_stepcostFactor + abs(SL-favoured_steplength)*prefered_stepcostFactor + surf_normal*edge_costFactor;
         if(cost<min_cost){
             Foot_1 = {x1,y1,height};
             min_cost = cost;
@@ -109,13 +110,12 @@ double get_globalPlan_cost(double x,double y,int sample_points){
 }
 
 
-void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub){
-
+void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::Publisher next_step_pub){
+    aliengo_msgs::transition_foothold transn_footholds;
     if(using_joystick){
         double collision_cost = collision_check(false);
-        bool nfp(false);
         if(collision_cost>collision_threshold){
-            nfp =true;
+            transn_footholds.collision_halt = true;
             return;
         }
     }
@@ -126,7 +126,7 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub){
     else{
         return;
     }
-
+    transn_footholds.collision_halt = false;
     double length (robot_config[0]), 
             width (robot_config[1] + 2*robot_config[2]);
 
@@ -160,6 +160,32 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub){
             RR_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RR_0,2));
             RL_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RL_0,3));
         }
+        double planar_cost(0);
+        for(int i=0;i<steps_horizon;i++){
+        planar_cost+= (FL_foot_holds[i][2]+FR_foot_holds[i][2]+RR_foot_holds[i][2]+RL_foot_holds[i][2])/4;
+        }
+        
+        transn_footholds.Future_planarcost = planar_cost/steps_horizon;
+        transn_footholds.FL.x = FL_foot_holds[0][0];
+        transn_footholds.FL.y = FL_foot_holds[0][1];
+        transn_footholds.FL.z = FL_foot_holds[0][2];
+
+        transn_footholds.FR.x = FR_foot_holds[0][0];
+        transn_footholds.FR.y = FR_foot_holds[0][1];
+        transn_footholds.FR.z = FR_foot_holds[0][2];
+
+        transn_footholds.RL.x = RL_foot_holds[0][0];
+        transn_footholds.RL.y = RL_foot_holds[0][1];
+        transn_footholds.RL.z = RL_foot_holds[0][2];
+
+        transn_footholds.RR.x = RR_foot_holds[0][0];
+        transn_footholds.RR.y = RR_foot_holds[0][1];
+        transn_footholds.RR.z = RR_foot_holds[0][2];
+        
+        transn_footholds.velx = v;
+        transn_footholds.velw = w;
+        next_step_pub.publish(transn_footholds);
+
         if(visualize_plan){
             visualization_msgs::MarkerArray Foot_Markerarr;
             Foot_Markerarr.markers.resize(steps_horizon*4);
