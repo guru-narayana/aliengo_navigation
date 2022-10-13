@@ -138,22 +138,20 @@ vector<vector<double>> generate_swing_coefs(vector<double> p_init,vector<double>
 }
 
 void height_adjust(ros::Publisher jnt_st_pub){
-    double delta_h = robot_base_height-base_pose_z,
+    double delta_h = robot_base_height-FL_current_xyz_st[0],
+    initial_height = FL_current_xyz_st[0],
     Time = abs(delta_h)/robot_verti_vel,
     init_time = ros::Time::now().toSec();
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
     ros::Rate rate(100);
-    vector<double>  FL = {current_robot_footsteps[0][0],current_robot_footsteps[0][1],current_robot_footsteps[0][2]},
-                FR = {current_robot_footsteps[1][0],current_robot_footsteps[1][1],current_robot_footsteps[0][2]},
-                RL = {current_robot_footsteps[2][0],current_robot_footsteps[2][1],current_robot_footsteps[0][2]},
-                RR = {current_robot_footsteps[3][0],current_robot_footsteps[3][1],current_robot_footsteps[0][2]};
+    vector<double>  FL = FL_current_xyz_st,FR = FR_current_xyz_st,RL = RL_current_xyz_st,RR = RR_current_xyz_st;
     while(ros::Time::now().toSec()-init_time<=Time){
-        double h = (ros::Time::now().toSec()-init_time)*delta_h/Time + base_pose_z;
-        FL[2] = h;FR[2] = h;RL[2] = h;RR[2] = h;
-        vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(FL)),
-                        RL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToRL(RL)),
-                        FR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToFR(FR)),
-                        RR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToRR(RR));
+        double h = (ros::Time::now().toSec()-init_time)*delta_h/Time + initial_height;
+        FL[0] = h;FR[0] = h;RL[0] = h;RR[0] = h;
+        vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(FL),
+                        RL_req_jnt = quad_kinem_g.Left_Leg_IK(RL),
+                        FR_req_jnt = quad_kinem_g.Right_Leg_IK(FR),
+                        RR_req_jnt = quad_kinem_g.Right_Leg_IK(RR);
         jnt_set_st.joint_positions[0] = -FR_req_jnt[0];
         jnt_set_st.joint_positions[1] = -FR_req_jnt[1];
         jnt_set_st.joint_positions[2] = -FR_req_jnt[2];
@@ -176,12 +174,13 @@ void shift_mode(ros::Publisher jnt_st_pub){
                     endpnt_RL = {-robot_config[0]/2,((robot_config[1]/2) + robot_config[2]),-robot_base_height},
                     endpnt_FR = {robot_config[0]/2,-((robot_config[1]/2) + robot_config[2]),-robot_base_height},
                     endpnt_RR = {-robot_config[0]/2,-((robot_config[1]/2) + robot_config[2]),-robot_base_height};
-    double T = 0.3;
+    double T = 0.25;
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
+
     vector<vector<double>> A_FL = generate_swing_coefs(current_robot_footsteps[0],endpnt_FL), 
                             A_FR = generate_swing_coefs(current_robot_footsteps[1],endpnt_FR), 
                             A_RL = generate_swing_coefs(current_robot_footsteps[2],endpnt_RL), 
-                            A_RR = generate_swing_coefs(current_robot_footsteps[3],endpnt_RR);
+                            A_RR = generate_swing_coefs(current_robot_footsteps[3],endpnt_RR);    
     double init_time = ros::Time::now().toSec();
     ros::Rate frequency(100);
     while(ros::Time::now().toSec()-init_time<=T){
@@ -197,6 +196,24 @@ void shift_mode(ros::Publisher jnt_st_pub){
         jnt_set_st.joint_positions[6] = -RR_req_jnt[0];
         jnt_set_st.joint_positions[7] = -RR_req_jnt[1];
         jnt_set_st.joint_positions[8] = -RR_req_jnt[2];
+        jnt_st_pub.publish(jnt_set_st);
+        frequency.sleep();
+        
+    }
+    init_time = ros::Time::now().toSec();
+    while(ros::Time::now().toSec()-init_time<=T){
+        double u = (ros::Time::now().toSec()-init_time)/T;
+        vector<vector<double>> u_mat = {{1,u,pow(u,2)}};
+        vector<vector<double>> FR_cnt_pos = Multiply(u_mat,A_FR),
+                                RL_cnt_pos = Multiply(u_mat,A_RL);
+        vector<double> FR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToFR(FR_cnt_pos[0])),
+                        RL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToRL(RL_cnt_pos[0]));
+        jnt_set_st.joint_positions[0] = -FR_req_jnt[0];
+        jnt_set_st.joint_positions[1] = -FR_req_jnt[1];
+        jnt_set_st.joint_positions[2] = -FR_req_jnt[2];
+        jnt_set_st.joint_positions[9] = RL_req_jnt[0];
+        jnt_set_st.joint_positions[10]= RL_req_jnt[1];
+        jnt_set_st.joint_positions[11]= RL_req_jnt[2];
         jnt_st_pub.publish(jnt_set_st);
         frequency.sleep();
         

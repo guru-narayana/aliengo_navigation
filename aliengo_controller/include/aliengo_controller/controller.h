@@ -13,7 +13,7 @@
 #include <math.h>
 #include <iomanip>
 #include <stdexcept>
-
+#include "sensor_msgs/JointState.h"
 using namespace std;
 
 extern vector<double> robot_config;
@@ -22,7 +22,7 @@ extern double robot_verti_vel;
 extern double robot_base_height;
 extern double robot_swing_height;
 extern unitree_legged_msgs::Aliengo_Joint_controll jnt_set_st;
-
+extern vector<double> FL_current_xyz_st,RL_current_xyz_st,FR_current_xyz_st,RR_current_xyz_st;
 
 extern double base_pose_yaw;
 extern double base_pose_y;
