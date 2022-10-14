@@ -143,7 +143,7 @@ void height_adjust(ros::Publisher jnt_st_pub){
     Time = abs(delta_h)/robot_verti_vel,
     init_time = ros::Time::now().toSec();
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
-    ros::Rate rate(100);
+    ros::Rate rate(controller_rate);
     vector<double>  FL = FL_current_xyz_st,FR = FR_current_xyz_st,RL = RL_current_xyz_st,RR = RR_current_xyz_st;
     while(ros::Time::now().toSec()-init_time<=Time){
         double h = (ros::Time::now().toSec()-init_time)*delta_h/Time + initial_height;
@@ -182,7 +182,7 @@ void shift_mode(ros::Publisher jnt_st_pub){
                             A_RL = generate_swing_coefs(current_robot_footsteps[2],endpnt_RL), 
                             A_RR = generate_swing_coefs(current_robot_footsteps[3],endpnt_RR);    
     double init_time = ros::Time::now().toSec();
-    ros::Rate frequency(100);
+    ros::Rate frequency(controller_rate);
     while(ros::Time::now().toSec()-init_time<=T){
         double u = (ros::Time::now().toSec()-init_time)/T;
         vector<vector<double>> u_mat = {{1,u,pow(u,2)}};

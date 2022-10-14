@@ -41,6 +41,7 @@ extern double max_angular_vel;
 extern double base_pose_yaw;
 extern double base_pose_y;
 extern double base_pose_x;
+extern double base_pose_z;
 extern string robot_base_frame;
 extern bool using_joystick;
 extern int vx_samples;

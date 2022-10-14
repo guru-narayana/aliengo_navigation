@@ -1,10 +1,13 @@
-# foot position with respect to base frame
-geometry_msgs/Point FL
-geometry_msgs/Point FR
-geometry_msgs/Point RL
-geometry_msgs/Point RR
+geometry_msgs/Point FL1
+geometry_msgs/Point FR1
+geometry_msgs/Point RL1
+geometry_msgs/Point RR1
+geometry_msgs/Point FL2
+geometry_msgs/Point FR2
+geometry_msgs/Point RL2
+geometry_msgs/Point RR2
 
-float64 velx
-float64 velw
+float64 vel1
+float64 vel2
 float64 Future_planarcost
 bool collision_halt

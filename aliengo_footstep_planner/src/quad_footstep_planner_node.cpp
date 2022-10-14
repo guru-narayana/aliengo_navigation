@@ -38,6 +38,7 @@ double max_angular_vel;
 double base_pose_yaw;
 double base_pose_y;
 double base_pose_x;
+double base_pose_z;
 string robot_base_frame;
 string goal_topic;
 
@@ -95,6 +96,7 @@ void base_pose_cb(const geometry_msgs::PoseWithCovarianceStamped& msg){
     base_pose_yaw = yaw;
     base_pose_x = msg.pose.pose.position.x;
     base_pose_y = msg.pose.pose.position.y;
+    base_pose_z = msg.pose.pose.position.z;
     start.header = msg.header;
     start.pose = msg.pose.pose;
 }
@@ -115,15 +117,15 @@ void get_params(ros::NodeHandle& nh){
     nh.param("Grid_map_topic", grid_map_topic, string("/elevation_mapping/elevation_map_raw"));
     nh.param("Grid_map_resolution", grid_map_resolution, 0.03);
     nh.param("visualize_plan", visualize_plan, true);
-    nh.param("max_steplength", max_steplength, 3*grid_map_resolution);
-    nh.param("min_steplength", min_steplength, grid_map_resolution);
-    nh.param("favoured_steplength", favoured_steplength, 2*grid_map_resolution);
+    nh.param("max_steplength", max_steplength, 0.15);
+    nh.param("min_steplength", min_steplength, 0.05);
+    nh.param("favoured_steplength", favoured_steplength, 0.11);
     nh.param("resolution_steplength", resolution_steplength, 0.01);
     nh.param("prefered_stepcostFactor", prefered_stepcostFactor, 0.4);
     nh.param("collision_costFactor", collision_costFactor, 1.2);
     nh.param("global_costFactor", global_costFactor, 0.4);
     nh.param("obstacle_stepcostFactor", obstacle_stepcostFactor, 0.6);
-    nh.param("edge_costFactor", edge_costFactor, 10.0);
+    nh.param("edge_costFactor", edge_costFactor, 1.0);
     nh.param("using_joystick", using_joystick, true);
     nh.param("joystick_topic", joystick_topic, string("/joy"));
     nh.param("horizon_length", horizon_length, 13);

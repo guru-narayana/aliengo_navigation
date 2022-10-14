@@ -39,10 +39,7 @@
         </include>
         <!-- environment blocks, obstacles or stairs -->
 
-        
-        <include>
-          <uri>model://turtlebot3_house</uri>
-        </include>
+
 
 
     <model name="static_environment">

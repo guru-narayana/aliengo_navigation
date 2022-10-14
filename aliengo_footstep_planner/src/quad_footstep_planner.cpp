@@ -1,10 +1,11 @@
 #include "aliengo_footstep_planner/quad_footstep_planner.h"
 
 
-vector<double> next_step(double R,double theta,double v,double w,double base_x,double base_y,double yaw,vector<double> Position_0,int foot_type){
+vector<vector<double>> next_step(double R,double theta,double v,double w,double base_x,double base_y,double yaw,vector<double> Position_0,int foot_type){
     vector<double> Foot_1(3,0),temp(2,0);
     double SL = min_steplength,alpha=0,min_cost(100000.0);
-
+    vector<vector<double>> out ={};
+    vector<double> vr_vect={0};
     while(SL<max_steplength){
         SL += resolution_steplength;
         alpha = 2*asin(SL/(2*R));
@@ -69,11 +70,14 @@ vector<double> next_step(double R,double theta,double v,double w,double base_x,d
         double surf_normal = sqrt( pow(elev_map.atPosition("normal_vectors_y",Position(x1,y1)),2) + pow(elev_map.atPosition("normal_vectors_x",Position(x1,y1)),2));
         double cost = height*obstacle_stepcostFactor + abs(SL-favoured_steplength)*prefered_stepcostFactor + surf_normal*edge_costFactor;
         if(cost<min_cost){
-            Foot_1 = {x1,y1,height};
+            Foot_1 = {cos(yaw-base_pose_yaw)*(x+base_x) - sin(yaw-base_pose_yaw)*(y+base_y),sin(yaw-base_pose_yaw)*(x+base_x) + cos(yaw-base_pose_yaw)*(y+base_y),-base_pose_z+height};
             min_cost = cost;
+            vr_vect[0] = sqrt(pow((v + vr*sin(theta0)),2) + pow((vr*cos(theta0)),2));
         }
     }
-    return Foot_1;
+    out.push_back(Foot_1);
+    out.push_back(vr_vect);
+    return out;
 }
 
 void get_optim_vels(){
@@ -143,6 +147,7 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
         vector<double>  FL_0 = {length/2,width/2},FR_0 = {length/2,-width/2},
                         RR_0 = {-length/2,-width/2},RL_0 = {-length/2,width/2};
         vector<vector<double>> FL_foot_holds,FR_foot_holds,RL_foot_holds,RR_foot_holds;
+        vector<double> velocities_requires ={};
         for(int i=0;i<steps_horizon;i++){
             double t = (time_prd/steps_horizon)*i;
             double base_x(0),base_y(0),
@@ -155,10 +160,11 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
                 base_x = v*t;
                 base_y = 0;
             }
-            FL_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, FL_0,0));
-            FR_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, FR_0,1));
-            RR_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RR_0,2));
-            RL_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RL_0,3));
+            FL_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, FL_0,0)[0]);
+            FR_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, FR_0,1)[0]);
+            RR_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RR_0,2)[0]);
+            RL_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RL_0,3)[0]);
+            velocities_requires.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, FL_0,0)[1][0]);
         }
         double planar_cost(0);
         for(int i=0;i<steps_horizon;i++){
@@ -166,31 +172,40 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
         }
         
         transn_footholds.Future_planarcost = planar_cost/steps_horizon;
-        transn_footholds.FL.x = FL_foot_holds[0][0];
-        transn_footholds.FL.y = FL_foot_holds[0][1];
-        transn_footholds.FL.z = FL_foot_holds[0][2];
+        transn_footholds.FL1.x = FL_foot_holds[0][0];
+        transn_footholds.FL1.y = FL_foot_holds[0][1];
+        transn_footholds.FL1.z = FL_foot_holds[0][2];
+        transn_footholds.FR1.x = FR_foot_holds[0][0];
+        transn_footholds.FR1.y = FR_foot_holds[0][1];
+        transn_footholds.FR1.z = FR_foot_holds[0][2];
+        transn_footholds.RL1.x = RL_foot_holds[0][0];
+        transn_footholds.RL1.y = RL_foot_holds[0][1];
+        transn_footholds.RL1.z = RL_foot_holds[0][2];
+        transn_footholds.RR1.x = RR_foot_holds[0][0];
+        transn_footholds.RR1.y = RR_foot_holds[0][1];
+        transn_footholds.RR1.z = RR_foot_holds[0][2];
+        transn_footholds.FL2.x = FL_foot_holds[1][0];
+        transn_footholds.FL2.y = FL_foot_holds[1][1];
+        transn_footholds.FL2.z = FL_foot_holds[1][2];
+        transn_footholds.FR2.x = FR_foot_holds[1][0];
+        transn_footholds.FR2.y = FR_foot_holds[1][1];
+        transn_footholds.FR2.z = FR_foot_holds[1][2];
+        transn_footholds.RL2.x = RL_foot_holds[1][0];
+        transn_footholds.RL2.y = RL_foot_holds[1][1];
+        transn_footholds.RL2.z = RL_foot_holds[1][2];
+        transn_footholds.RR2.x = RR_foot_holds[1][0];
+        transn_footholds.RR2.y = RR_foot_holds[1][1];
+        transn_footholds.RR2.z = RR_foot_holds[1][2];
 
-        transn_footholds.FR.x = FR_foot_holds[0][0];
-        transn_footholds.FR.y = FR_foot_holds[0][1];
-        transn_footholds.FR.z = FR_foot_holds[0][2];
-
-        transn_footholds.RL.x = RL_foot_holds[0][0];
-        transn_footholds.RL.y = RL_foot_holds[0][1];
-        transn_footholds.RL.z = RL_foot_holds[0][2];
-
-        transn_footholds.RR.x = RR_foot_holds[0][0];
-        transn_footholds.RR.y = RR_foot_holds[0][1];
-        transn_footholds.RR.z = RR_foot_holds[0][2];
-        
-        transn_footholds.velx = v;
-        transn_footholds.velw = w;
+        transn_footholds.vel1 = velocities_requires[0];
+        transn_footholds.vel2 = velocities_requires[1];
         next_step_pub.publish(transn_footholds);
 
         if(visualize_plan){
             visualization_msgs::MarkerArray Foot_Markerarr;
             Foot_Markerarr.markers.resize(steps_horizon*4);
             for(int i=0;i<steps_horizon;i++){
-                Foot_Markerarr.markers[i].header.frame_id = elev_map.getFrameId();
+                Foot_Markerarr.markers[i].header.frame_id = "base";
                 Foot_Markerarr.markers[i].header.stamp = ros::Time::now();
                 Foot_Markerarr.markers[i].ns = "foots";
                 Foot_Markerarr.markers[i].id = i;
@@ -210,7 +225,7 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
                 Foot_Markerarr.markers[i].color.r = 0.0;
                 Foot_Markerarr.markers[i].color.g = 1.0;
                 Foot_Markerarr.markers[i].color.b = 0.0;
-                Foot_Markerarr.markers[i+steps_horizon].header.frame_id = elev_map.getFrameId();
+                Foot_Markerarr.markers[i+steps_horizon].header.frame_id = "base";
                 Foot_Markerarr.markers[i+steps_horizon].header.stamp = ros::Time::now();
                 Foot_Markerarr.markers[i+steps_horizon].ns = "foots";
                 Foot_Markerarr.markers[i+steps_horizon].id = i+steps_horizon;
@@ -230,7 +245,7 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
                 Foot_Markerarr.markers[i+steps_horizon].color.r = 1.0;
                 Foot_Markerarr.markers[i+steps_horizon].color.g = 0.0;
                 Foot_Markerarr.markers[i+steps_horizon].color.b = 0.0;
-                Foot_Markerarr.markers[i+2*steps_horizon].header.frame_id = elev_map.getFrameId();
+                Foot_Markerarr.markers[i+2*steps_horizon].header.frame_id = "base";
                 Foot_Markerarr.markers[i+2*steps_horizon].header.stamp = ros::Time::now();
                 Foot_Markerarr.markers[i+2*steps_horizon].ns = "foots";
                 Foot_Markerarr.markers[i+2*steps_horizon].id = i+steps_horizon*2;
@@ -250,7 +265,7 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
                 Foot_Markerarr.markers[i+2*steps_horizon].color.r = 0.0;
                 Foot_Markerarr.markers[i+2*steps_horizon].color.g = 0.0;
                 Foot_Markerarr.markers[i+2*steps_horizon].color.b = 1.0;
-                Foot_Markerarr.markers[i+3*steps_horizon].header.frame_id = elev_map.getFrameId();
+                Foot_Markerarr.markers[i+3*steps_horizon].header.frame_id = "base";
                 Foot_Markerarr.markers[i+3*steps_horizon].header.stamp = ros::Time::now();
                 Foot_Markerarr.markers[i+3*steps_horizon].ns = "foots";
                 Foot_Markerarr.markers[i+3*steps_horizon].id = i+steps_horizon*3;
