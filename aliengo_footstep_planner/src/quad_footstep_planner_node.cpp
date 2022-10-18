@@ -25,6 +25,8 @@ int steps_horizon;
 int vtheta_samples;
 int vx_samples;
 vector<double> robot_config = {0,0,0,0,0};
+int contacts = 0; 
+
 double collision_rect_length;
 double collision_rect_width;
 double collision_point_height;
@@ -41,6 +43,7 @@ double base_pose_x;
 double base_pose_z;
 string robot_base_frame;
 string goal_topic;
+
 
 string grid_map_topic;
 string joystick_topic;
@@ -61,7 +64,9 @@ bool recived_global_plan = false;
 void joy_cb(const sensor_msgs::Joy::ConstPtr& msg)
 {
     joystick_vals[0] = msg->axes[0]; 
-    joystick_vals[1] = msg->axes[1]; 
+    joystick_vals[1] = msg->axes[1];
+
+    
 }
 
 void gridmap_cb(const grid_map_msgs::GridMap& msg)
@@ -72,6 +77,8 @@ void gridmap_cb(const grid_map_msgs::GridMap& msg)
 
 void current_foot_st_cb(const aliengo_msgs::quad_footstep& msg)
 {
+    contacts = msg.contact_state[0]+ msg.contact_state[1]+
+                msg.contact_state[2]+ msg.contact_state[3];
     current_robot_footsteps.clear();
     vector<double> temp0 = {msg.FL.x,msg.FL.y,msg.FL.z};
     current_robot_footsteps.push_back(temp0);
@@ -117,16 +124,16 @@ void get_params(ros::NodeHandle& nh){
     nh.param("Grid_map_topic", grid_map_topic, string("/elevation_mapping/elevation_map_raw"));
     nh.param("Grid_map_resolution", grid_map_resolution, 0.03);
     nh.param("visualize_plan", visualize_plan, true);
-    nh.param("max_steplength", max_steplength, 0.15);
-    nh.param("min_steplength", min_steplength, 0.05);
-    nh.param("favoured_steplength", favoured_steplength, 0.11);
+    nh.param("max_steplength", max_steplength, 0.05);
+    nh.param("min_steplength", min_steplength, 0.02);
+    nh.param("favoured_steplength", favoured_steplength, 0.03);
     nh.param("resolution_steplength", resolution_steplength, 0.01);
     nh.param("prefered_stepcostFactor", prefered_stepcostFactor, 0.4);
     nh.param("collision_costFactor", collision_costFactor, 1.2);
     nh.param("global_costFactor", global_costFactor, 0.4);
     nh.param("obstacle_stepcostFactor", obstacle_stepcostFactor, 0.6);
     nh.param("edge_costFactor", edge_costFactor, 1.0);
-    nh.param("using_joystick", using_joystick, true);
+    nh.param("using_joystick", using_joystick, false);
     nh.param("joystick_topic", joystick_topic, string("/joy"));
     nh.param("horizon_length", horizon_length, 13);
     nh.param("foot_plan_horizon", steps_horizon, 5);
@@ -143,7 +150,7 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/collision_point_height",collision_point_height, 0.2);
     nh.param("/robot_config/collision_threshold",collision_threshold, 20.5);
     nh.param("/robot_config/collision_free_threshold",collision_free_threshold, 100.0);
-    nh.param("/robot_config/max_forward_vel",max_forward_vel,  0.5);
+    nh.param("/robot_config/max_forward_vel",max_forward_vel,  0.2);
     nh.param("/robot_config/min_forward_vel",min_forward_vel,  -0.5);   // m/s
     nh.param("/robot_config/min_angular_vel",min_angular_vel, -0.872); // rad/s
     nh.param("/robot_config/max_angular_vel",max_angular_vel,  0.872);
@@ -175,7 +182,7 @@ int main(int argc, char** argv)
     if(!using_joystick) joy_sub.shutdown();
     while (ros::ok()){
         ros::spinOnce();
-        if(map_available){
+        if(map_available && (contacts >= 2)){
         plan_footsteps(poly_pub,foot_marker_pub,next_foot_pub);
         loop_rate.sleep();
 

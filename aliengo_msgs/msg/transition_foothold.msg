@@ -11,3 +11,4 @@ float64 vel1
 float64 vel2
 float64 Future_planarcost
 bool collision_halt
+geometry_msgs/Pose base_pose

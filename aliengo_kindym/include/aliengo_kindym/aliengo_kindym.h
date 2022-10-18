@@ -19,6 +19,10 @@ public:
     vector<double> BaseToRL(vector<double> xyz_base);
     vector<double> BaseToFR(vector<double> xyz_base);
     vector<double> BaseToRR(vector<double> xyz_base);
+    vector<double> FLToBase(vector<double> xyz_base);
+    vector<double> RLToBase(vector<double> xyz_base);
+    vector<double> RRToBase(vector<double> xyz_base);
+    vector<double> FRToBase(vector<double> xyz_base);
     
 };
 

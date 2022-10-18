@@ -31,6 +31,25 @@ vector<double> quad_kinem::BaseToRR(vector<double> xyz_base){
 }
 
 
+vector<double> quad_kinem::FLToBase(vector<double> xyz_base){
+    vector<double> xyz = {xyz_base[2]+Length/2,xyz_base[1]+width/2,-xyz_base[0]};
+    return xyz;
+}
+vector<double> quad_kinem::FRToBase(vector<double> xyz_base){
+    vector<double> xyz = {xyz_base[2]+Length/2,xyz_base[1]-width/2,-xyz_base[0]};
+    return xyz;
+}
+vector<double> quad_kinem::RLToBase(vector<double> xyz_base){
+    vector<double> xyz = {xyz_base[2]-Length/2,xyz_base[1]+width/2,-xyz_base[0]};
+    return xyz;
+}
+vector<double> quad_kinem::RRToBase(vector<double> xyz_base){
+    vector<double> xyz = {xyz_base[2]-Length/2,xyz_base[1]-width/2,-xyz_base[0]};
+    return xyz;
+}
+
+
+
 vector<double> quad_kinem::Left_Leg_IK(vector<double> xyz_state){
     double P1,P2,P3,P4;
     vector<double> thta = {0,0,0};

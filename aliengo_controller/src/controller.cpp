@@ -10,7 +10,13 @@ double robot_base_height;
 double robot_swing_height;
 unitree_legged_msgs::Aliengo_Joint_controll jnt_set_st;
 int controller_rate;
+double toe_radius;
 bool swing = true;
+vector<int> contacts = {0,0,0,0};
+double walk_marigin;
+double walk_mariginx;
+double swing_time;
+double walk_base_vel;
 
 //Regular updated params
 double base_pose_yaw;
@@ -49,16 +55,22 @@ void base_pose_cb(const geometry_msgs::PoseWithCovarianceStamped& msg){
 
 void current_foot_st_cb(const aliengo_msgs::quad_footstep& msg){
     nrecvd_callback2 = false;
+    // contact order FL -> FR -> RL -> RR
     current_robot_footsteps.clear();
+
+    contacts = msg.contact_state;
+    
     vector<double> temp0 = {msg.FL.x,msg.FL.y,msg.FL.z};
     current_robot_footsteps.push_back(temp0);
+
     vector<double> temp1 = {msg.FR.x,msg.FR.y,msg.FR.z};
     current_robot_footsteps.push_back(temp1);
+
     vector<double> temp2 = {msg.RL.x,msg.RL.y,msg.RL.z};
     current_robot_footsteps.push_back(temp2);
+
     vector<double> temp3 = {msg.RR.x,msg.RR.y,msg.RR.z};
     current_robot_footsteps.push_back(temp3);
-
 }
 void joint_current_act_state_callback(const sensor_msgs::JointState::ConstPtr& msg){
     nrecvd_callback1 = false;
@@ -88,7 +100,6 @@ void joint_current_act_state_callback(const sensor_msgs::JointState::ConstPtr& m
     RL_current_xyz_st = quad_kinem_g.Left_Leg_FK(RL_current_jnt_st);
     FR_current_xyz_st = quad_kinem_g.Right_Leg_FK(FR_current_jnt_st);
     RR_current_xyz_st = quad_kinem_g.Right_Leg_FK(RR_current_jnt_st);
-   // cout<<FR_current_xyz_st[0]<<"  " <<FR_current_xyz_st[1]<<"   "<<FR_current_xyz_st[2]<<"\n";
 }
 void trnsn_foot_st_callback(const aliengo_msgs::transition_foothold& msg){
     foot_holds = msg;
@@ -100,12 +111,17 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/L1",robot_config[2],  0.083);
     nh.param("/robot_config/L2",robot_config[3], 0.25);
     nh.param("/robot_config/L3",robot_config[4], 0.25);
+    nh.param("/robot_config/toe_radius",toe_radius, 0.0265);
     nh.param("/robot_config/robot_base_frame",robot_base_frame,  string("/base"));
 
-    nh.param("robot_verti_vel",robot_verti_vel, 0.06);
-    nh.param("robot_base_height",robot_base_height, 0.35);
-    nh.param("robot_swing_height",robot_swing_height, 0.05);
+    nh.param("robot_verti_vel",robot_verti_vel, 0.05);
+    nh.param("robot_base_height",robot_base_height, 0.32);
+    nh.param("robot_swing_height",robot_swing_height, 0.07);
     nh.param("controller_rate",controller_rate, 500);
+    nh.param("walk_mariginy",walk_marigin, 0.03);
+    nh.param("walk_mariginx",walk_mariginx, 0.06);
+    nh.param("walk_swing_time",swing_time, 0.2);
+    nh.param("walk_base_vel",walk_base_vel, 0.05);
 
 }
 
@@ -121,20 +137,21 @@ int main(int argc,char** argv){
     ros::Publisher jnt_st_pub = nh.advertise<unitree_legged_msgs::Aliengo_Joint_controll>("/Aliengo_jnt_req_state", 1);
 
     get_params(nh);
-    while(nrecvd_callback1 || nrecvd_callback2 || nrecvd_callback3){
+    while(ros::ok() && (nrecvd_callback1 || nrecvd_callback2)){
         ros::spinOnce();
     }
     height_adjust(jnt_st_pub);
     ros::Duration(0.5).sleep();
     shift_mode(jnt_st_pub);
-    int i=0;
-    while(ros::ok()){
-    if(!foot_holds.collision_halt && !nrecvd_callback3){
-        trot_a_step(jnt_st_pub);
-        nrecvd_callback3= true;
-    }
-
+    ros::Duration(0.5).sleep();
     ros::spinOnce();
+    while(ros::ok()){
+        if(!foot_holds.collision_halt && !nrecvd_callback3){
+            walk_a_step(jnt_st_pub);
+            nrecvd_callback3= true;
+            height_adjust(jnt_st_pub);
+        }
+        ros::spinOnce();
     }
 
 }

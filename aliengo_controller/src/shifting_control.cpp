@@ -129,7 +129,7 @@ vector<vector<double>> Multiply(vector <vector<double>> &a, vector <vector<doubl
     return c;
 }
 vector<vector<double>> generate_swing_coefs(vector<double> p_init,vector<double> p_final){
-    vector<double> p_middle = {(p_init[0]+p_final[0])/2,(p_init[1]+p_final[1])/2,min(p_init[2],p_final[2])+robot_swing_height};
+    vector<double> p_middle = {(p_init[0]+p_final[0])/2,(p_init[1]+p_final[1])/2,max(p_init[2],p_final[2])+robot_swing_height};
     vector<vector<double>> P_mat = {p_init,p_middle,p_final};
     double z_ratio = p_final[2]/(p_final[2]+p_init[2]);
     vector<vector<double>> B = {{1,0,0},{1,z_ratio,pow(z_ratio,2)},{1,1,1}};
@@ -198,7 +198,7 @@ void shift_mode(ros::Publisher jnt_st_pub){
         jnt_set_st.joint_positions[8] = -RR_req_jnt[2];
         jnt_st_pub.publish(jnt_set_st);
         frequency.sleep();
-        
+        ros::spinOnce();
     }
     init_time = ros::Time::now().toSec();
     while(ros::Time::now().toSec()-init_time<=T){
@@ -216,6 +216,8 @@ void shift_mode(ros::Publisher jnt_st_pub){
         jnt_set_st.joint_positions[11]= RL_req_jnt[2];
         jnt_st_pub.publish(jnt_set_st);
         frequency.sleep();
-        
+        ros::spinOnce();
     }
+    ros::spinOnce();
+
 }

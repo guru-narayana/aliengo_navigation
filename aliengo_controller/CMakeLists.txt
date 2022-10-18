@@ -26,5 +26,5 @@ include_directories(
   ${catkin_INCLUDE_DIRS}
 )
 
-add_executable(quad_controller_node src/controller.cpp src/shifting_control.cpp src/trot.cpp)
+add_executable(quad_controller_node src/controller.cpp src/shifting_control.cpp src/trot.cpp src/walk.cpp)
 target_link_libraries(quad_controller_node ${catkin_LIBRARIES} )

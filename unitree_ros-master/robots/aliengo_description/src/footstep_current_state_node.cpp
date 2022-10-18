@@ -10,20 +10,20 @@ aliengo_msgs::quad_footstep foot_status;
 tf::StampedTransform FL_tf,FR_tf,RL_tf,RR_tf;
 
 void FL_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
-    if(msg->wrench.force.z > 10)foot_status.contact_state[0] = true;
-    else foot_status.contact_state[0] = false;
+    if(msg->wrench.force.z > 10)foot_status.contact_state[0] = 1;
+    else foot_status.contact_state[0] = 0;
 }
 void FR_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
-    if(msg->wrench.force.z > 10) foot_status.contact_state[1] = true;
-    else foot_status.contact_state[1] = false;
+    if(msg->wrench.force.z > 10) foot_status.contact_state[1] = 1;
+    else foot_status.contact_state[1] = 0;
 }
 void RL_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
-    if(msg->wrench.force.z > 10) foot_status.contact_state[2] = true;
-    else foot_status.contact_state[2] = false;
+    if(msg->wrench.force.z > 10) foot_status.contact_state[2] = 1;
+    else foot_status.contact_state[2] = 0;
 }
 void RR_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
-    if(msg->wrench.force.z > 10) foot_status.contact_state[3] = true;
-    else foot_status.contact_state[3] = false;
+    if(msg->wrench.force.z > 10) foot_status.contact_state[3] = 1;
+    else foot_status.contact_state[3] = 0;
 }
 int main(int argc,char** argv){
     ros::init(argc,argv,"footstep_state_publisher");
@@ -41,7 +41,7 @@ int main(int argc,char** argv){
 
     double foot_radius;
     nh.param("/robot_config/foot_radius",foot_radius,  0.0265);
-    ros::Rate loop_rate(10);
+    ros::Rate loop_rate(500);
 
     while(ros::ok()){        
         try{

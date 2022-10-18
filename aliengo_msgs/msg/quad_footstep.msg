@@ -5,4 +5,4 @@ geometry_msgs/Point RL
 geometry_msgs/Point RR
 
 # contact message order FL FR RL RR
-bool[] contact_state
+int32[] contact_state

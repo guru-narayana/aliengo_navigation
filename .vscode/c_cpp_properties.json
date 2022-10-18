@@ -41,6 +41,7 @@
                 "/home/guru/catkin_ws/src/Aliengo_3dNav/unitree_ros-master/unitree_legged_control/include/**",
                 "/home/guru/catkin_ws/src/aliengo_navigation/aliengo_footstep_planner/include/**",
                 "/home/guru/catkin_ws/src/aliengo_navigation/aliengo_kindym/include/**",
+                "/home/guru/catkin_ws/src/aliengo_controller/include/**",
                 "/usr/include/**",
                 "/opt/ros/noetic/include",
                 "/usr/include/eigen3"

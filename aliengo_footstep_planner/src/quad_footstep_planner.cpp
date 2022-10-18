@@ -125,9 +125,11 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
     }
     else if(!using_joystick && recived_global_plan){
         // cout<<global_path_poses[0].pose.position.x<<endl;
+        cout<<"worknig"<<endl;
         get_optim_vels();
     }
     else{
+        cout<<"worknig"<<endl;
         return;
     }
     transn_footholds.collision_halt = false;
@@ -148,6 +150,7 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
                         RR_0 = {-length/2,-width/2},RL_0 = {-length/2,width/2};
         vector<vector<double>> FL_foot_holds,FR_foot_holds,RL_foot_holds,RR_foot_holds;
         vector<double> velocities_requires ={};
+
         for(int i=0;i<steps_horizon;i++){
             double t = (time_prd/steps_horizon)*i;
             double base_x(0),base_y(0),
@@ -159,6 +162,11 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
             else{
                 base_x = v*t;
                 base_y = 0;
+            }
+            if(i == 1){
+                transn_footholds.base_pose.position.x = base_x;
+                transn_footholds.base_pose.position.y = base_y;
+                transn_footholds.base_pose.orientation.z = w*t;
             }
             FL_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, FL_0,0)[0]);
             FR_foot_holds.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, FR_0,1)[0]);
