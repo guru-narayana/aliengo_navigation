@@ -2,15 +2,15 @@ Quad_footstep_planner:
   Grid_map_topic : /elevation_mapping/elevation_map_raw
   Grid_map_resolution : 0.03
   visualize_plan : true
-  max_steplength : 0.1
-  min_steplength : 0.05
-  favoured_steplength : 0.07
+  max_steplength : 0.15
+  min_steplength : 0.09
+  favoured_steplength : 0.09
   resolution_steplength : 0.01
   prefered_stepcostFactor : 0.7
   obstacle_stepcostFactor : 0.6
   collision_costFactor : 1.2
   global_costFactor : 0.4
-  edge_costFactor : 100.0
+  edge_costFactor : 3.0
   using_joystick : true
   joystick_topic : /joy
   horizon_length : 3

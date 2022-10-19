@@ -67,8 +67,10 @@ vector<vector<double>> next_step(double R,double theta,double v,double w,double 
         double x1 = cos(yaw)*(x+base_x) - sin(yaw)*(y+base_y) + base_pose_x;
         double y1 = sin(yaw)*(x+base_x) + cos(yaw)*(y+base_y) + base_pose_y;
         double height = elev_map.atPosition("elevation_inpainted",Position(x1,y1));
-        double surf_normal = sqrt( pow(elev_map.atPosition("normal_vectors_y",Position(x1,y1)),2) + pow(elev_map.atPosition("normal_vectors_x",Position(x1,y1)),2));
-        double cost = height*obstacle_stepcostFactor + abs(SL-favoured_steplength)*prefered_stepcostFactor + surf_normal*edge_costFactor;
+        double surf_normal = elev_map.atPosition("normal_vectors_z",Position(x1,y1));
+        double cost = height*obstacle_stepcostFactor + abs(SL-favoured_steplength)*prefered_stepcostFactor - surf_normal*edge_costFactor;
+        cout<<cost<<endl;
+
         if(cost<min_cost){
             Foot_1 = {cos(yaw-base_pose_yaw)*(x+base_x) - sin(yaw-base_pose_yaw)*(y+base_y),sin(yaw-base_pose_yaw)*(x+base_x) + cos(yaw-base_pose_yaw)*(y+base_y),-base_pose_z+height};
             min_cost = cost;
@@ -116,7 +118,6 @@ double get_globalPlan_cost(double x,double y,int sample_points){
 
 void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::Publisher next_step_pub){
     aliengo_msgs::transition_foothold transn_footholds;
-    cout<<"vl: "<< max(0.0,(joystick_vals[1]*max_forward_vel))<<"  w: "<<(joystick_vals[0]*max_angular_vel)<<endl;
     if(using_joystick && (joystick_vals[0]!=0 || joystick_vals[1]!=0)){
         double collision_cost = collision_check(false);
         if(collision_cost>0.0){

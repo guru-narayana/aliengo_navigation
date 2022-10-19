@@ -41,7 +41,7 @@ void swng(ros::Publisher jnt_st_pub,vector<double>& iniat,vector<double> finl,in
     double init_time = ros::Time::now().toSec();
     ros::Rate frequency(controller_rate);
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
-        vector<vector<double>> A = generate_swing_coefs(iniat,finl);
+        vector<vector<double>> A = generate_swing_coefs_walk(iniat,finl);
     vector<double> cnt_pos,FL_req_jnt,FR_req_jnt,RL_req_jnt,RR_req_jnt;
     while(ros::ok()&&(ros::Time::now().toSec()-init_time<=swing_time)){
         double u = (ros::Time::now().toSec()-init_time)/swing_time;

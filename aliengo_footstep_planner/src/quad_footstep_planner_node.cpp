@@ -147,7 +147,7 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/L3",robot_config[4], 0.25);
     nh.param("/robot_config/collision_rect_length",collision_rect_length, 0.65);
     nh.param("/robot_config/collision_rect_width",collision_rect_width, 0.3);
-    nh.param("/robot_config/collision_point_height",collision_point_height, 0.2);
+    nh.param("/robot_config/collision_point_height",collision_point_height, 0.3);
     nh.param("/robot_config/collision_threshold",collision_threshold, 0.0);
     nh.param("/robot_config/collision_free_threshold",collision_free_threshold, 100.0);
     nh.param("/robot_config/max_forward_vel",max_forward_vel,  0.2);

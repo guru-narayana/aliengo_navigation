@@ -136,7 +136,15 @@ vector<vector<double>> generate_swing_coefs(vector<double> p_init,vector<double>
     vector<vector<double>> B_inv = getInverse(B);
     return Multiply(B_inv,P_mat);
 }
-
+vector<vector<double>> generate_swing_coefs_walk(vector<double> p_init,vector<double> p_final){
+    vector<double> p_middle = {(p_init[0]+p_final[0])/2,(p_init[1]+p_final[1])/2,max(p_init[2],p_final[2])+robot_swing_height};
+    double z_ratio = p_final[2]/(p_final[2]+p_init[2]);
+    vector<vector<double>> B = {{1,0,0},{1,z_ratio,pow(z_ratio,2)},{1,1,1}};
+    p_final[2] = -robot_base_height;
+    vector<vector<double>> P_mat = {p_init,p_middle,p_final};
+    vector<vector<double>> B_inv = getInverse(B);
+    return Multiply(B_inv,P_mat);
+}
 void height_adjust(ros::Publisher jnt_st_pub){
     double delta_h = robot_base_height-FL_current_xyz_st[0],
     initial_heightFL = FL_current_xyz_st[0],
