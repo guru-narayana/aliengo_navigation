@@ -17,6 +17,7 @@ double walk_marigin;
 double walk_mariginx;
 double swing_time;
 double walk_base_vel;
+double favoured_steplength;
 
 //Regular updated params
 double base_pose_yaw;
@@ -115,13 +116,14 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/robot_base_frame",robot_base_frame,  string("/base"));
 
     nh.param("robot_verti_vel",robot_verti_vel, 0.05);
-    nh.param("robot_base_height",robot_base_height, 0.32);
-    nh.param("robot_swing_height",robot_swing_height, 0.07);
+    nh.param("robot_base_height",robot_base_height, 0.37);
+    nh.param("robot_swing_height",robot_swing_height, 0.02);
     nh.param("controller_rate",controller_rate, 500);
-    nh.param("walk_mariginy",walk_marigin, 0.03);
-    nh.param("walk_mariginx",walk_mariginx, 0.06);
+    nh.param("walk_mariginy",walk_marigin, 0.04);
+    nh.param("walk_mariginx",walk_mariginx, 0.08);
     nh.param("walk_swing_time",swing_time, 0.2);
     nh.param("walk_base_vel",walk_base_vel, 0.05);
+    nh.param("favoured_steplength", favoured_steplength, 0.02);
 
 }
 
@@ -145,12 +147,24 @@ int main(int argc,char** argv){
     shift_mode(jnt_st_pub);
     ros::Duration(0.5).sleep();
     ros::spinOnce();
+    bool walk = false;
     while(ros::ok()){
-        if(!foot_holds.collision_halt && !nrecvd_callback3){
-            walk_a_step(jnt_st_pub);
+        double cost = (foot_holds.Future_planarcost +2*base_pose_z +(current_robot_footsteps[0][2]+current_robot_footsteps[1][2]+current_robot_footsteps[2][2]+current_robot_footsteps[3][2])/4)/2;
+        if(!foot_holds.collision_halt && !nrecvd_callback3 && cost<0.05){
+            if(cost>0.03 && walk==false){
+                shift_mode(jnt_st_pub);
+                walk=true;
+            }
+            else if(cost<=0.03 && walk==true){
+                shift_mode(jnt_st_pub);
+                walk=false;
+            }
+            cout<<cost<<endl;
+            if(walk) walk_a_step(jnt_st_pub);
+            else trot_a_step(jnt_st_pub);
             nrecvd_callback3= true;
-            height_adjust(jnt_st_pub);
         }
+
         ros::spinOnce();
     }
 

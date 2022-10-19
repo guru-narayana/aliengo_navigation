@@ -33,6 +33,7 @@ extern double walk_mariginx;
 extern double stance_time;
 extern double swing_time;
 extern double walk_base_vel;
+extern double favoured_steplength;
 
 
 extern vector<int> contacts;

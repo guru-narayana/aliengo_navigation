@@ -139,15 +139,18 @@ vector<vector<double>> generate_swing_coefs(vector<double> p_init,vector<double>
 
 void height_adjust(ros::Publisher jnt_st_pub){
     double delta_h = robot_base_height-FL_current_xyz_st[0],
-    initial_height = FL_current_xyz_st[0],
+    initial_heightFL = FL_current_xyz_st[0],
+    initial_heightRL = RL_current_xyz_st[0],
+    initial_heightFR = FR_current_xyz_st[0],
+    initial_heightRR = RR_current_xyz_st[0],
     Time = abs(delta_h)/robot_verti_vel,
     init_time = ros::Time::now().toSec();
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
     ros::Rate rate(controller_rate);
     vector<double>  FL = FL_current_xyz_st,FR = FR_current_xyz_st,RL = RL_current_xyz_st,RR = RR_current_xyz_st;
     while(ros::Time::now().toSec()-init_time<=Time){
-        double h = (ros::Time::now().toSec()-init_time)*delta_h/Time + initial_height;
-        FL[0] = h;FR[0] = h;RL[0] = h;RR[0] = h;
+        double h = (ros::Time::now().toSec()-init_time)*delta_h/Time ;
+        FL[0] = h+initial_heightFL;FR[0] = h+initial_heightFR;RL[0] = h+initial_heightRL;RR[0] = h+initial_heightRR;
         vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(FL),
                         RL_req_jnt = quad_kinem_g.Left_Leg_IK(RL),
                         FR_req_jnt = quad_kinem_g.Right_Leg_IK(FR),
@@ -201,6 +204,7 @@ void shift_mode(ros::Publisher jnt_st_pub){
         ros::spinOnce();
     }
     init_time = ros::Time::now().toSec();
+    A_RL = generate_swing_coefs(current_robot_footsteps[2],endpnt_RL); A_FR = generate_swing_coefs(current_robot_footsteps[1],endpnt_FR);   
     while(ros::Time::now().toSec()-init_time<=T){
         double u = (ros::Time::now().toSec()-init_time)/T;
         vector<vector<double>> u_mat = {{1,u,pow(u,2)}};
