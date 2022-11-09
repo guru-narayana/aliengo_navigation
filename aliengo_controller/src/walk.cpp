@@ -43,50 +43,151 @@ void swng(ros::Publisher jnt_st_pub,vector<double>& iniat,vector<double> finl,in
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
         vector<vector<double>> A = generate_swing_coefs_walk(iniat,finl);
     vector<double> cnt_pos,FL_req_jnt,FR_req_jnt,RL_req_jnt,RR_req_jnt;
+    
+    tf::TransformListener listener;
     while(ros::ok()&&(ros::Time::now().toSec()-init_time<=swing_time)){
         double u = (ros::Time::now().toSec()-init_time)/swing_time;
         vector<vector<double>> u_mat = {{1,u,pow(u,2)}};
         switch (cls)
         {
         case 0:
-            if(contacts[0]==0  || u<0.5) cnt_pos = Multiply(u_mat,A)[0];
+            if(contacts[0]==0  || u<0.2){
+            cnt_pos = Multiply(u_mat,A)[0];
             FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(cnt_pos));
             jnt_set_st.joint_positions[3] = FL_req_jnt[0];
             jnt_set_st.joint_positions[4] = FL_req_jnt[1];
             jnt_set_st.joint_positions[5] = FL_req_jnt[2];
+            jnt_st_pub.publish(jnt_set_st);        
+            }
             break;
         case 1:
-            if(contacts[1]==0  || u<0.5) cnt_pos = Multiply(u_mat,A)[0];
+            if(contacts[1]==0  || u<0.2){ 
+            cnt_pos = Multiply(u_mat,A)[0];
             FR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToFR(cnt_pos));
             jnt_set_st.joint_positions[0] = -FR_req_jnt[0];
             jnt_set_st.joint_positions[1] = -FR_req_jnt[1];
             jnt_set_st.joint_positions[2] = -FR_req_jnt[2];
+            jnt_st_pub.publish(jnt_set_st);
+            }        
             break;
         case 2:
-            if(contacts[2]==0  || u<0.5) cnt_pos = Multiply(u_mat,A)[0];
+            if(contacts[2]==0  || u<0.2){ cnt_pos = Multiply(u_mat,A)[0];
             RL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToRL(cnt_pos));
             jnt_set_st.joint_positions[9] = RL_req_jnt[0];
             jnt_set_st.joint_positions[10]= RL_req_jnt[1];
             jnt_set_st.joint_positions[11]= RL_req_jnt[2];
+            jnt_st_pub.publish(jnt_set_st);        
+            }
             break;
         case 3:
-            if(contacts[3]==0  || u<0.5) cnt_pos = Multiply(u_mat,A)[0];
+            if(contacts[3]==0  || u<0.2){
+            cnt_pos = Multiply(u_mat,A)[0];
             RR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToRR(cnt_pos));
             jnt_set_st.joint_positions[6] = -RR_req_jnt[0];
             jnt_set_st.joint_positions[7] = -RR_req_jnt[1];
             jnt_set_st.joint_positions[8] = -RR_req_jnt[2];
+            jnt_st_pub.publish(jnt_set_st);        
+            }
             break;
         default:
             break;
-        }
-        
-        jnt_st_pub.publish(jnt_set_st);
+        }        
         frequency.sleep();
         ros::spinOnce();
-        
     }
+
+
+    geometry_msgs::PointStamped base_point;
+    base_point.header.frame_id = "base";
+    base_point.header.stamp = ros::Time();
+    base_point.point.x = cnt_pos[0];
+    base_point.point.y = cnt_pos[1];
+    base_point.point.z = cnt_pos[2];
+    geometry_msgs::PointStamped world_point;
+    listener.transformPoint("/world", base_point, world_point);
+    world_point.point.z-=0.23;
+    listener.transformPoint("/base", world_point, base_point);
+
+
+    init_time = ros::Time::now().toSec();
+    bool nd = true;
+    vector<double> cnt_pos1 = cnt_pos;
+    while(ros::ok()&&(ros::Time::now().toSec()-init_time<=swing_time)&&nd){
+        double u = (ros::Time::now().toSec()-init_time)/swing_time;
+        switch (cls)
+        {
+        case 0:
+            if(contacts[0]==0){
+            cnt_pos[0] = cnt_pos1[0]*(1-u) + u*base_point.point.x;
+            cnt_pos[1] = cnt_pos1[1]*(1-u) + u*base_point.point.y;
+            cnt_pos[2] = cnt_pos1[2]*(1-u) + u*base_point.point.z;
+            FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(cnt_pos));
+            jnt_set_st.joint_positions[3] = FL_req_jnt[0];
+            jnt_set_st.joint_positions[4] = FL_req_jnt[1];
+            jnt_set_st.joint_positions[5] = FL_req_jnt[2];
+            jnt_st_pub.publish(jnt_set_st);        
+            }
+            else {
+                nd = false;
+            }
+            break;
+        case 1:
+            if(contacts[1]==0){ 
+            cnt_pos[0] = cnt_pos1[0]*(1-u) + u*base_point.point.x;
+            cnt_pos[1] = cnt_pos1[1]*(1-u) + u*base_point.point.y;
+            cnt_pos[2] = cnt_pos1[2]*(1-u) + u*base_point.point.z;
+            FR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToFR(cnt_pos));
+            jnt_set_st.joint_positions[0] = -FR_req_jnt[0];
+            jnt_set_st.joint_positions[1] = -FR_req_jnt[1];
+            jnt_set_st.joint_positions[2] = -FR_req_jnt[2];
+            jnt_st_pub.publish(jnt_set_st);
+            } 
+            else {
+                nd = false;
+            }      
+            break;
+        case 2:
+            if(contacts[2]==0){
+            cnt_pos[0] = cnt_pos1[0]*(1-u) + u*base_point.point.x;
+            cnt_pos[1] = cnt_pos1[1]*(1-u) + u*base_point.point.y;
+            cnt_pos[2] = cnt_pos1[2]*(1-u) + u*base_point.point.z;
+            RL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToRL(cnt_pos));
+            jnt_set_st.joint_positions[9] = RL_req_jnt[0];
+            jnt_set_st.joint_positions[10]= RL_req_jnt[1];
+            jnt_set_st.joint_positions[11]= RL_req_jnt[2];
+            jnt_st_pub.publish(jnt_set_st);        
+            }
+            else {
+                nd = false;
+            }
+            break;
+        case 3:
+            if(contacts[3]==0){
+            cnt_pos[0] = cnt_pos1[0]*(1-u) + u*base_point.point.x;
+            cnt_pos[1] = cnt_pos1[1]*(1-u) + u*base_point.point.y;
+            cnt_pos[2] = cnt_pos1[2]*(1-u) + u*base_point.point.z;
+            RR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToRR(cnt_pos));
+            jnt_set_st.joint_positions[6] = -RR_req_jnt[0];
+            jnt_set_st.joint_positions[7] = -RR_req_jnt[1];
+            jnt_set_st.joint_positions[8] = -RR_req_jnt[2];
+            jnt_st_pub.publish(jnt_set_st);        
+            }
+            else {
+                nd = false;
+            }
+            break;
+        default:
+            break;
+        }        
+        frequency.sleep();
+        ros::spinOnce();
+    }
+
     iniat = cnt_pos;
+
+
 }
+
 void rotate_base(ros::Publisher jnt_st_pub,vector<double>&  FL_init,vector<double>&  FR_init,vector<double>&  RL_init,vector<double>&  RR_init,double omega){
         vector<double> FL = {FL_init[0]*cos(omega) - FL_init[1]*sin(omega) - FL_init[0] ,FL_init[0]*sin(omega) + FL_init[1]*cos(omega) - FL_init[1]},
                         RL = {RL_init[0]*cos(omega) - RL_init[1]*sin(omega) - RL_init[0] ,RL_init[0]*sin(omega) + RL_init[1]*cos(omega) - RL_init[1]},
@@ -120,10 +221,48 @@ void rotate_base(ros::Publisher jnt_st_pub,vector<double>&  FL_init,vector<doubl
             jnt_set_st.joint_positions[7] = -RR_req_jnt[1];
             jnt_set_st.joint_positions[8] = -RR_req_jnt[2];
             jnt_st_pub.publish(jnt_set_st);
+            ros::spinOnce();
             frequency.sleep();
         }
 }
+
+void adjust_pitch(ros::Publisher jnt_st_pub){
+    vector<double> FL_init = current_robot_footsteps[0],FR_init = current_robot_footsteps[1], // change to local base
+                RL_init = current_robot_footsteps[2],RR_init = current_robot_footsteps[3];
+    vector<double> FL_cnt_pos = current_robot_footsteps[0],FR_cnt_pos = current_robot_footsteps[1], // change to local base
+                RL_cnt_pos = current_robot_footsteps[2],RR_cnt_pos = current_robot_footsteps[3];
+    bool front = false,back=false;
+    if(abs(FL_init[2])<(robot_base_height-0.05) && abs(FR_init[2])<(robot_base_height-0.05) &&  abs(FL_init[2]-FR_init[2])<0.06) front = true;
+    if(abs(RL_init[2])<(robot_base_height-0.05) && abs(RR_init[2])<(robot_base_height-0.05) &&  abs(RL_init[2]-RR_init[2])<0.06) back = true;
+    if(front) cout<<"height"<<endl;
+    
+    quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
+    double init_time = ros::Time::now().toSec();
+    ros::Rate frequency(controller_rate);
+    double T = 0.9;
+    while(ros::ok()&&(ros::Time::now().toSec()-init_time<=T) && (front || back)){
+        double u = (ros::Time::now().toSec()-init_time)/T;
+        //cout<<u<<endl;
+        if(front){
+            FL_cnt_pos[2] = FL_init[2]*(1-u) -(robot_base_height-0.09)*u;
+            FR_cnt_pos[2] = FR_init[2]*(1-u) -(robot_base_height-0.09)*u;
+            vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(FL_cnt_pos)),
+                    FR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToFR(FR_cnt_pos));
+            jnt_set_st.joint_positions[0] = -FR_req_jnt[0];
+            jnt_set_st.joint_positions[1] = -FR_req_jnt[1];
+            jnt_set_st.joint_positions[2] = -FR_req_jnt[2];
+            jnt_set_st.joint_positions[3] = FL_req_jnt[0];
+            jnt_set_st.joint_positions[4] = FL_req_jnt[1];
+            jnt_set_st.joint_positions[5] = FL_req_jnt[2];
+            jnt_st_pub.publish(jnt_set_st);
+            ros::spinOnce();
+            frequency.sleep();
+        }
+        
+    }
+}
 void walk_a_step(ros::Publisher jnt_st_pub){
+    if(foot_holds.vel1==0 && foot_holds.vel2==0) return;
     vector<double> FL_init = current_robot_footsteps[0],FR_init = current_robot_footsteps[1], // change to local base
                     RL_init = current_robot_footsteps[2],RR_init = current_robot_footsteps[3];
     double X = foot_holds.base_pose.position.x,Y = foot_holds.base_pose.position.y,omega =foot_holds.base_pose.orientation.z ;
@@ -131,15 +270,20 @@ void walk_a_step(ros::Publisher jnt_st_pub){
     vector<double> FL1 = {foot_holds.FL1.x,foot_holds.FL1.y,foot_holds.FL1.z+toe_radius},FR1 = {foot_holds.FR1.x,foot_holds.FR1.y,foot_holds.FR1.z+toe_radius/2},
                 RL1 = {foot_holds.RL1.x,foot_holds.RL1.y,foot_holds.RL1.z+toe_radius},RR1 = {foot_holds.RR1.x,foot_holds.RR1.y,foot_holds.RR1.z+toe_radius/2};
 
-    move_base(-walk_marigin,walk_mariginx/walk_base_vel,FL_init,FR_init,RL_init,RR_init,jnt_st_pub,FL1,FR1,RL1,RR1,-walk_mariginx);
+    move_base(-walk_marigin,walk_marigin/walk_base_vel,FL_init,FR_init,RL_init,RR_init,jnt_st_pub,FL1,FR1,RL1,RR1,X + walk_mariginx);
+    swng(jnt_st_pub,RL_init,RL1,2);
     swng(jnt_st_pub,FL_init,FL1,0);
     move_base(2*walk_marigin,2*walk_marigin/walk_base_vel,FL_init,FR_init,RL_init,RR_init,jnt_st_pub,FL1,FR1,RL1,RR1,0);
-    swng(jnt_st_pub,FR_init,FR1,1);
-    move_base(0,2*walk_mariginx/walk_base_vel,FL_init,FR_init,RL_init,RR_init,jnt_st_pub,FL1,FR1,RL1,RR1,2*walk_mariginx);
     swng(jnt_st_pub,RR_init,RR1,3);
-    move_base(-2*walk_marigin,2*walk_marigin/walk_base_vel,FL_init,FR_init,RL_init,RR_init,jnt_st_pub,FL1,FR1,RL1,RR1,0);
-    swng(jnt_st_pub,RL_init,RL1,2);
-    move_base(walk_marigin+Y,max(abs(-walk_mariginx+X),abs(walk_marigin+Y))/walk_base_vel,FL_init,FR_init,RL_init,RR_init,jnt_st_pub,FL1,FR1,RL1,RR1,-walk_mariginx+X);
+    swng(jnt_st_pub,FR_init,FR1,1);
+    move_base(-walk_marigin+Y,abs(walk_marigin+Y)/walk_base_vel,FL_init,FR_init,RL_init,RR_init,jnt_st_pub,FL1,FR1,RL1,RR1,-walk_mariginx);
+    
+    
     rotate_base(jnt_st_pub,FL_init,FR_init,RL_init,RR_init,omega);
+    //ros::Duration(0.5).sleep();
+
+    //height_adjust(jnt_st_pub);
+
+    adjust_pitch(jnt_st_pub);
 }
 

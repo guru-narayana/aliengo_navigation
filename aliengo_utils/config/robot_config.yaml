@@ -9,8 +9,8 @@ robot_config:
   collision_point_height: 0.2
   collision_threshold: 20.5
   collision_free_threshold: 99.5
-  max_forward_vel:  0.1
-  min_angular_vel: -0.3
-  max_angular_vel: 0.3
+  max_forward_vel:  0.18
+  min_angular_vel: -0.35
+  max_angular_vel: 0.35
   robot_base_frame: base
   foot_radius: 0.0265

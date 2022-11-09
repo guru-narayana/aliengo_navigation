@@ -22,6 +22,9 @@
         "complex": "cpp",
         "*.ipp": "cpp",
         "random": "cpp",
-        "tuple": "cpp"
+        "tuple": "cpp",
+        "chrono": "cpp",
+        "limits": "cpp",
+        "valarray": "cpp"
     }
 }

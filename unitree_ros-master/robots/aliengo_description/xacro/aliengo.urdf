@@ -100,7 +100,7 @@
   <!-- Foot contacts. -->
   <gazebo reference="FR_calf">
     <sensor name="FR_foot_contact" type="contact">
-      <update_rate>100</update_rate>
+      <update_rate>2000</update_rate>
       <plugin filename="libunitreeFootContactPlugin.so" name="contactPlugin"/>
       <contact>
         <collision>FR_calf_fixed_joint_lump__FR_foot_collision_1</collision>
@@ -109,7 +109,7 @@
   </gazebo>
   <gazebo reference="FL_calf">
     <sensor name="FL_foot_contact" type="contact">
-      <update_rate>100</update_rate>
+      <update_rate>2000</update_rate>
       <plugin filename="libunitreeFootContactPlugin.so" name="contactPlugin"/>
       <contact>
         <collision>FL_calf_fixed_joint_lump__FL_foot_collision_1</collision>
@@ -118,7 +118,7 @@
   </gazebo>
   <gazebo reference="RR_calf">
     <sensor name="RR_foot_contact" type="contact">
-      <update_rate>100</update_rate>
+      <update_rate>2000</update_rate>
       <plugin filename="libunitreeFootContactPlugin.so" name="contactPlugin"/>
       <contact>
         <collision>RR_calf_fixed_joint_lump__RR_foot_collision_1</collision>
@@ -127,7 +127,7 @@
   </gazebo>
   <gazebo reference="RL_calf">
     <sensor name="RL_foot_contact" type="contact">
-      <update_rate>100</update_rate>
+      <update_rate>2000</update_rate>
       <plugin filename="libunitreeFootContactPlugin.so" name="contactPlugin"/>
       <contact>
         <collision>RL_calf_fixed_joint_lump__RL_foot_collision_1</collision>
@@ -164,7 +164,7 @@
   <gazebo reference="FL_thigh">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
     <kp value="1000000.0"/>
     <kd value="1.0"/>
@@ -172,15 +172,16 @@
   <gazebo reference="FL_calf">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
   </gazebo>
   <gazebo reference="FL_foot">
-    <mu1>1.0</mu1>
-    <mu2>1.0</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
-    <kp value="1000000.0"/>
-    <kd value="10"/>
+    <kp>800000.0</kp>
+    <kd>100.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
   </gazebo>
   <!-- FR leg -->
   <gazebo reference="FR_hip">
@@ -191,7 +192,7 @@
   <gazebo reference="FR_thigh">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
     <kp value="1000000.0"/>
     <kd value="1.0"/>
@@ -199,15 +200,16 @@
   <gazebo reference="FR_calf">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
   </gazebo>
   <gazebo reference="FR_foot">
-    <mu1>1.0</mu1>
-    <mu2>1.0</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
-    <kp value="1000000.0"/>
-    <kd value="10"/>
+    <kp>800000.0</kp>
+    <kd>100.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
   </gazebo>
   <!-- RL leg -->
   <gazebo reference="RL_hip">
@@ -218,23 +220,24 @@
   <gazebo reference="RL_thigh">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
-    <kp value="1000000.0"/>
+    <kp value="100000.0"/>
     <kd value="1.0"/>
   </gazebo>
   <gazebo reference="RL_calf">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
   </gazebo>
   <gazebo reference="RL_foot">
-    <mu1>1.0</mu1>
-    <mu2>1.0</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
-    <kp value="1000000.0"/>
-    <kd value="10"/>
+    <kp>800000.0</kp>
+    <kd>100.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
   </gazebo>
   <!-- RR leg -->
   <gazebo reference="RR_hip">
@@ -245,7 +248,7 @@
   <gazebo reference="RR_thigh">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
     <kp value="1000000.0"/>
     <kd value="1.0"/>
@@ -253,15 +256,16 @@
   <gazebo reference="RR_calf">
     <mu1>0.2</mu1>
     <mu2>0.2</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
   </gazebo>
   <gazebo reference="RR_foot">
-    <mu1>1.0</mu1>
-    <mu2>1.0</mu2>
-    <self_collide>1</self_collide>
+    <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
-    <kp value="1000000.0"/>
-    <kd value="10"/>
+    <kp>800000.0</kp>
+    <kd>100.0</kd>
+    <mu1>0.8</mu1>
+    <mu2>0.8</mu2>
+    <maxVel>0.0</maxVel>
   </gazebo>
   <!-- Debug mode will hung up the robot, use "true" or "false" to switch it. -->
   <!-- <xacro:if value="$(arg DEBUG)">

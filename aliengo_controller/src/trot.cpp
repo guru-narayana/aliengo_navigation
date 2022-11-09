@@ -11,12 +11,17 @@ void trot_a_step(ros::Publisher jnt_st_pub){
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
     double R(sqrt(pow((robot_config[0])/2,2)+pow((robot_config[1] + 2*robot_config[2])/2,2))),
             theta(atan((robot_config[0])/(robot_config[1] + 2*robot_config[2])));
-    double v = foot_holds.vel1,w = foot_holds.vel2,
-           SL = favoured_steplength,
+    double v = max(foot_holds.vel1,0.0),w = foot_holds.vel2,
+           SL = max(favoured_steplength*(v/max_forward_vel),0.021),
             alpha = 2*asin(SL/(2*R)),
             vr = (SL*w)/alpha,
             freq = sqrt(9.81/robot_base_height);
+    if(v==0 && w==0){
+        shift_mode(jnt_st_pub);
+        return;
 
+    }
+    cout<<v<<endl;
     if(swing){ // swing FL
         double thetaFR,thetaRL;
         vector<double> tempFR(2,0),tempRL(2,0);
@@ -39,7 +44,7 @@ void trot_a_step(ros::Publisher jnt_st_pub){
         vector<double> FR = {FR0[0] + SL*sin(thetaFR1)-FR_init[0],FR0[1] + SL*cos(thetaFR1)-FR_init[1]},
                         RL = {RL0[0] + SL*sin(thetaRL1)-RL_init[0],RL0[1] + SL*cos(thetaRL1)-RL_init[1]};
 
-        double T = max(min(SL/sqrt( pow(v + vr*sin(thetaFR),2) + pow(vr*cos(thetaFR),2)),0.5),0.1);
+        double T = max(min(SL/sqrt( pow(v + vr*sin(thetaFR),2) + pow(vr*cos(thetaFR),2)),0.3),0.05);
         vector<vector<double>> A_fl = generate_swing_coefs(FL_init,FL0),
                                 A_rr = generate_swing_coefs(RR_init,RR0);
         double init_time = ros::Time::now().toSec();

@@ -8,6 +8,6 @@
         <remap from="/move_base_simple/goal" to="/aliengo_goal"/>
      </node>
     
-     <node name="footstep_state_publisher" pkg="aliengo_description" type="footstep_state_publisher" >
+     <node name="footstep_state_publisher" pkg="aliengo_description" type="footstep_state_publisher" output="screen">
      </node>
 </launch>

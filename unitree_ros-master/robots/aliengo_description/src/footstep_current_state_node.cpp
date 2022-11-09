@@ -8,21 +8,26 @@ using namespace std;
 aliengo_msgs::quad_footstep foot_status;
 
 tf::StampedTransform FL_tf,FR_tf,RL_tf,RR_tf;
+tf::StampedTransform FLw_tf,FRw_tf,RLw_tf,RRw_tf,base_tf;
 
 void FL_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
-    if(msg->wrench.force.z > 10)foot_status.contact_state[0] = 1;
+    double force = sqrt(pow(msg->wrench.force.x,2)+pow(msg->wrench.force.y,2)+pow(msg->wrench.force.z,2));
+    if(force > 1)foot_status.contact_state[0] = 1;
     else foot_status.contact_state[0] = 0;
 }
 void FR_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
-    if(msg->wrench.force.z > 10) foot_status.contact_state[1] = 1;
+    double force = sqrt(pow(msg->wrench.force.x,2)+pow(msg->wrench.force.y,2)+pow(msg->wrench.force.z,2));
+    if(force > 1) foot_status.contact_state[1] = 1;
     else foot_status.contact_state[1] = 0;
 }
 void RL_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
-    if(msg->wrench.force.z > 10) foot_status.contact_state[2] = 1;
+    double force = sqrt(pow(msg->wrench.force.x,2)+pow(msg->wrench.force.y,2)+pow(msg->wrench.force.z,2));
+    if(force > 1) foot_status.contact_state[2] = 1;
     else foot_status.contact_state[2] = 0;
 }
 void RR_contact_cb(const geometry_msgs::WrenchStampedConstPtr& msg){
-    if(msg->wrench.force.z > 10) foot_status.contact_state[3] = 1;
+    double force = sqrt(pow(msg->wrench.force.x,2)+pow(msg->wrench.force.y,2)+pow(msg->wrench.force.z,2));
+    if(force > 1) foot_status.contact_state[3] = 1;
     else foot_status.contact_state[3] = 0;
 }
 int main(int argc,char** argv){
@@ -41,7 +46,7 @@ int main(int argc,char** argv){
 
     double foot_radius;
     nh.param("/robot_config/foot_radius",foot_radius,  0.0265);
-    ros::Rate loop_rate(500);
+    ros::Rate loop_rate(10000);
 
     while(ros::ok()){        
         try{
@@ -64,7 +69,27 @@ int main(int argc,char** argv){
             foot_status.RR.x = RR_tf.getOrigin().x();
             foot_status.RR.y = RR_tf.getOrigin().y();
             foot_status.RR.z = RR_tf.getOrigin().z();
-            
+        
+
+            listener.lookupTransform("/map", "/FL_foot",ros::Time(0), FLw_tf);
+            listener.lookupTransform("/map", "/FR_foot",ros::Time(0), FRw_tf);
+            listener.lookupTransform("/map", "/RL_foot",ros::Time(0), RLw_tf);
+            listener.lookupTransform("/map", "/RR_foot",ros::Time(0), RRw_tf);
+            foot_status.FLw.x = FLw_tf.getOrigin().x();
+            foot_status.FLw.y = FLw_tf.getOrigin().y();
+            foot_status.FLw.z = FLw_tf.getOrigin().z();
+
+            foot_status.FRw.x = FRw_tf.getOrigin().x();
+            foot_status.FRw.y = FRw_tf.getOrigin().y();
+            foot_status.FRw.z = FRw_tf.getOrigin().z();
+
+            foot_status.RLw.x = RLw_tf.getOrigin().x();
+            foot_status.RLw.y = RLw_tf.getOrigin().y();
+            foot_status.RLw.z = RLw_tf.getOrigin().z();
+
+            foot_status.RRw.x = RRw_tf.getOrigin().x();
+            foot_status.RRw.y = RRw_tf.getOrigin().y();
+            foot_status.RRw.z = RRw_tf.getOrigin().z();
 
             foot_pub.publish(foot_status);
 

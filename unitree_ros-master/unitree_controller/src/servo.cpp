@@ -246,7 +246,7 @@ int main(int argc, char **argv)
     servo_pub[10] = n.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RL_thigh_controller/command", 1);
     servo_pub[11] = n.advertise<unitree_legged_msgs::MotorCmd>("/" + robot_name + "_gazebo/RL_calf_controller/command", 1);
 
-    ros::Duration(2).sleep();
+    ros::Duration(4).sleep();
 
     motion_init();
     while (ros::ok()){

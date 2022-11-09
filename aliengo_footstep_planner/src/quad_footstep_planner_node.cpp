@@ -38,6 +38,8 @@ double min_forward_vel;
 double min_angular_vel;
 double max_angular_vel;
 double base_pose_yaw;
+double base_pose_roll;
+double base_pose_pitch;
 double base_pose_y;
 double base_pose_x;
 double base_pose_z;
@@ -101,6 +103,9 @@ void base_pose_cb(const geometry_msgs::PoseWithCovarianceStamped& msg){
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
     base_pose_yaw = yaw;
+    base_pose_roll = roll;
+    base_pose_pitch = pitch;
+
     base_pose_x = msg.pose.pose.position.x;
     base_pose_y = msg.pose.pose.position.y;
     base_pose_z = msg.pose.pose.position.z;

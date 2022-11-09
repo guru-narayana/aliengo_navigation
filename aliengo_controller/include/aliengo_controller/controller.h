@@ -15,6 +15,9 @@
 #include <stdexcept>
 #include "sensor_msgs/JointState.h"
 #include "aliengo_msgs/transition_foothold.h"
+#include <geometry_msgs/PointStamped.h>
+#include <tf/transform_listener.h>
+
 
 using namespace std;
 
@@ -34,7 +37,8 @@ extern double stance_time;
 extern double swing_time;
 extern double walk_base_vel;
 extern double favoured_steplength;
-
+extern double max_forward_vel;
+extern double max_angular_vel;
 
 extern vector<int> contacts;
 extern double base_pose_yaw;

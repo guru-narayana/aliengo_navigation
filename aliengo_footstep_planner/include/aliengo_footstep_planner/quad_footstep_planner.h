@@ -39,6 +39,8 @@ extern double min_forward_vel;
 extern double min_angular_vel;
 extern double max_angular_vel;
 extern double base_pose_yaw;
+extern double base_pose_roll;
+extern double base_pose_pitch;
 extern double base_pose_y;
 extern double base_pose_x;
 extern double base_pose_z;

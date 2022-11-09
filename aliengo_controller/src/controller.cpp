@@ -18,7 +18,8 @@ double walk_mariginx;
 double swing_time;
 double walk_base_vel;
 double favoured_steplength;
-
+double max_forward_vel;
+double max_angular_vel;
 //Regular updated params
 double base_pose_yaw;
 double base_pose_y;
@@ -114,16 +115,21 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/L3",robot_config[4], 0.25);
     nh.param("/robot_config/toe_radius",toe_radius, 0.0265);
     nh.param("/robot_config/robot_base_frame",robot_base_frame,  string("/base"));
+    nh.param("/robot_config/max_forward_vel",max_forward_vel,  0.18);
+    nh.param("/robot_config/max_angular_vel",max_angular_vel, 0.872); // rad/s
+
+
 
     nh.param("robot_verti_vel",robot_verti_vel, 0.05);
-    nh.param("robot_base_height",robot_base_height, 0.37);
-    nh.param("robot_swing_height",robot_swing_height, 0.04);
+    nh.param("robot_base_height",robot_base_height, 0.40);
+    nh.param("robot_swing_height",robot_swing_height, 0.03);
     nh.param("controller_rate",controller_rate, 500);
-    nh.param("walk_mariginy",walk_marigin, 0.035);
-    nh.param("walk_mariginx",walk_mariginx, 0.1);
-    nh.param("walk_swing_time",swing_time, 0.5);
-    nh.param("walk_base_vel",walk_base_vel, 0.04);
-    nh.param("favoured_steplength", favoured_steplength, 0.02);
+
+    nh.param("walk_mariginy",walk_marigin, 0.05);
+    nh.param("walk_mariginx",walk_mariginx, 0.0);
+    nh.param("walk_swing_time",swing_time, 0.9);
+    nh.param("walk_base_vel",walk_base_vel, 0.08);
+    nh.param("favoured_steplength", favoured_steplength, 0.07);
 
 }
 
@@ -147,21 +153,24 @@ int main(int argc,char** argv){
     shift_mode(jnt_st_pub);
     ros::Duration(0.5).sleep();
     ros::spinOnce();
-    bool walk = false;
+    bool walk = true;
     while(ros::ok()){
-        double cost = 0.03;//foot_holds.Future_planarcost + base_pose_z ;//+(current_robot_footsteps[0][2]+current_robot_footsteps[1][2]+current_robot_footsteps[2][2]+current_robot_footsteps[3][2])/4)/2;
-        if(!foot_holds.collision_halt && !nrecvd_callback3 && cost<0.08){
-            if(cost>0.026 && walk==false){
-                shift_mode(jnt_st_pub);
-                walk=true;
-            }
-            else if(cost<=0.026 && walk==true){
-                shift_mode(jnt_st_pub);
-                walk=false;
-            }
-            cout<<cost<<endl;
+        double cost = foot_holds.Future_planarcost ;//+(current_robot_footsteps[0][2]+current_robot_footsteps[1][2]+current_robot_footsteps[2][2]+current_robot_footsteps[3][2])/4)/2;
+        if(!foot_holds.collision_halt && !nrecvd_callback3){
+            // if(cost>0.026 && walk==false){
+            //     ros::Duration(1).sleep();
+            //     height_adjust(jnt_st_pub);
+            //     ros::Duration(0.5).sleep();
+            //     shift_mode(jnt_st_pub);
+            //     walk=true;
+            // }
+            // else if(cost<=0.026 && walk==true){
+            //     shift_mode(jnt_st_pub);
+            //     walk=false;
+            // }
             if(walk) walk_a_step(jnt_st_pub);
             else trot_a_step(jnt_st_pub);
+
             nrecvd_callback3= true;
         }
 

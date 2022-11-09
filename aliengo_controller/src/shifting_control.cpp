@@ -137,28 +137,33 @@ vector<vector<double>> generate_swing_coefs(vector<double> p_init,vector<double>
     return Multiply(B_inv,P_mat);
 }
 vector<vector<double>> generate_swing_coefs_walk(vector<double> p_init,vector<double> p_final){
-    vector<double> p_middle = {(p_init[0]+p_final[0])/2,(p_init[1]+p_final[1])/2,max(p_init[2],p_final[2])+robot_swing_height};
+    vector<double> p_middle = {(p_init[0]+p_final[0])/2,(p_init[1]+p_final[1])/2,max(p_init[2],p_final[2])+robot_swing_height + 0.05};
     double z_ratio = p_final[2]/(p_final[2]+p_init[2]);
     vector<vector<double>> B = {{1,0,0},{1,z_ratio,pow(z_ratio,2)},{1,1,1}};
-    p_final[2] = -robot_base_height;
+    //p_final[2] = -robot_base_height - 0.03;
     vector<vector<double>> P_mat = {p_init,p_middle,p_final};
     vector<vector<double>> B_inv = getInverse(B);
     return Multiply(B_inv,P_mat);
 }
 void height_adjust(ros::Publisher jnt_st_pub){
-    double delta_h = robot_base_height-FL_current_xyz_st[0],
+    double delta_h1 = robot_base_height-FL_current_xyz_st[0],
+    delta_h2 = robot_base_height-RL_current_xyz_st[0],
+    delta_h3 = robot_base_height-FR_current_xyz_st[0],
+    delta_h4 = robot_base_height-RR_current_xyz_st[0],
     initial_heightFL = FL_current_xyz_st[0],
     initial_heightRL = RL_current_xyz_st[0],
     initial_heightFR = FR_current_xyz_st[0],
     initial_heightRR = RR_current_xyz_st[0],
-    Time = abs(delta_h)/robot_verti_vel,
+    Time = abs(delta_h1)/robot_verti_vel,
     init_time = ros::Time::now().toSec();
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
     ros::Rate rate(controller_rate);
     vector<double>  FL = FL_current_xyz_st,FR = FR_current_xyz_st,RL = RL_current_xyz_st,RR = RR_current_xyz_st;
     while(ros::Time::now().toSec()-init_time<=Time){
-        double h = (ros::Time::now().toSec()-init_time)*delta_h/Time ;
-        FL[0] = h+initial_heightFL;FR[0] = h+initial_heightFR;RL[0] = h+initial_heightRL;RR[0] = h+initial_heightRR;
+        FL[0] = (ros::Time::now().toSec()-init_time)*delta_h1/Time   +  initial_heightFL;
+        FR[0] = (ros::Time::now().toSec()-init_time)*delta_h3/Time   +  initial_heightFR;
+        RL[0] = (ros::Time::now().toSec()-init_time)*delta_h2/Time   +  initial_heightRL;
+        RR[0] = (ros::Time::now().toSec()-init_time)*delta_h4/Time   +  initial_heightRR;
         vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(FL),
                         RL_req_jnt = quad_kinem_g.Left_Leg_IK(RL),
                         FR_req_jnt = quad_kinem_g.Right_Leg_IK(FR),
@@ -185,7 +190,7 @@ void shift_mode(ros::Publisher jnt_st_pub){
                     endpnt_RL = {-robot_config[0]/2,((robot_config[1]/2) + robot_config[2]),-robot_base_height},
                     endpnt_FR = {robot_config[0]/2,-((robot_config[1]/2) + robot_config[2]),-robot_base_height},
                     endpnt_RR = {-robot_config[0]/2,-((robot_config[1]/2) + robot_config[2]),-robot_base_height};
-    double T = 0.25;
+    double T = 0.2;
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
 
     vector<vector<double>> A_FL = generate_swing_coefs(current_robot_footsteps[0],endpnt_FL), 
@@ -194,7 +199,7 @@ void shift_mode(ros::Publisher jnt_st_pub){
                             A_RR = generate_swing_coefs(current_robot_footsteps[3],endpnt_RR);    
     double init_time = ros::Time::now().toSec();
     ros::Rate frequency(controller_rate);
-    while(ros::Time::now().toSec()-init_time<=T){
+    while(ros::Time::now().toSec()-init_time<=T && ros::ok()){
         double u = (ros::Time::now().toSec()-init_time)/T;
         vector<vector<double>> u_mat = {{1,u,pow(u,2)}};
         vector<vector<double>> FL_cnt_pos = Multiply(u_mat,A_FL),
@@ -213,7 +218,7 @@ void shift_mode(ros::Publisher jnt_st_pub){
     }
     init_time = ros::Time::now().toSec();
     A_RL = generate_swing_coefs(current_robot_footsteps[2],endpnt_RL); A_FR = generate_swing_coefs(current_robot_footsteps[1],endpnt_FR);   
-    while(ros::Time::now().toSec()-init_time<=T){
+    while(ros::Time::now().toSec()-init_time<=T && ros::ok()){
         double u = (ros::Time::now().toSec()-init_time)/T;
         vector<vector<double>> u_mat = {{1,u,pow(u,2)}};
         vector<vector<double>> FR_cnt_pos = Multiply(u_mat,A_FR),
