@@ -17,12 +17,12 @@ void paramInit()
 {
     for(int i=0; i<4; i++){
         lowCmd.motorCmd[i*3+0].mode = 0x0A;
-        lowCmd.motorCmd[i*3+0].Kp = 140;
+        lowCmd.motorCmd[i*3+0].Kp = 240;
         lowCmd.motorCmd[i*3+0].dq = 0;
         lowCmd.motorCmd[i*3+0].Kd = 3;
         lowCmd.motorCmd[i*3+0].tau = 0;
         lowCmd.motorCmd[i*3+1].mode = 0x0A;
-        lowCmd.motorCmd[i*3+1].Kp = 360;
+        lowCmd.motorCmd[i*3+1].Kp = 600;
         lowCmd.motorCmd[i*3+1].dq = 0;
         lowCmd.motorCmd[i*3+1].Kd = 8;
         lowCmd.motorCmd[i*3+1].tau = 0;

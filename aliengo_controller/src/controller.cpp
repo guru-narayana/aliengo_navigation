@@ -16,12 +16,12 @@ vector<int> contacts = {0,0,0,0};
 double walk_marigin;
 double walk_mariginx;
 double swing_time;
-double walk_base_vel;
+double walk_base_time;
 double favoured_steplength;
 double max_forward_vel;
 double max_angular_vel;
 //Regular updated params
-double base_pose_yaw;
+double base_pose_yaw,base_pose_roll;
 double base_pose_y;
 double base_pose_z;
 double base_pose_x;
@@ -50,6 +50,7 @@ void base_pose_cb(const geometry_msgs::PoseWithCovarianceStamped& msg){
     double roll, pitch, yaw;
     m.getRPY(roll, pitch, yaw);
     base_pose_yaw = yaw;
+    base_pose_roll = roll;
     base_pose_x = msg.pose.pose.position.x;
     base_pose_y = msg.pose.pose.position.y;
     base_pose_z = msg.pose.pose.position.z;
@@ -121,14 +122,14 @@ void get_params(ros::NodeHandle& nh){
 
 
     nh.param("robot_verti_vel",robot_verti_vel, 0.05);
-    nh.param("robot_base_height",robot_base_height, 0.40);
-    nh.param("robot_swing_height",robot_swing_height, 0.03);
+    nh.param("robot_base_height",robot_base_height, 0.35);
+    nh.param("robot_swing_height",robot_swing_height, 0.08);
     nh.param("controller_rate",controller_rate, 500);
 
-    nh.param("walk_mariginy",walk_marigin, 0.05);
+    nh.param("walk_mariginy",walk_marigin, 0.07);
     nh.param("walk_mariginx",walk_mariginx, 0.0);
-    nh.param("walk_swing_time",swing_time, 0.9);
-    nh.param("walk_base_vel",walk_base_vel, 0.08);
+    nh.param("walk_swing_time",swing_time, 1.0);
+    nh.param("walk_base_time",walk_base_time, 0.85);
     nh.param("favoured_steplength", favoured_steplength, 0.07);
 
 }
@@ -150,10 +151,11 @@ int main(int argc,char** argv){
     }
     height_adjust(jnt_st_pub);
     ros::Duration(0.5).sleep();
-    shift_mode(jnt_st_pub);
+    //shift_mode(jnt_st_pub);
     ros::Duration(0.5).sleep();
     ros::spinOnce();
     bool walk = true;
+    tf::TransformListener listener;
     while(ros::ok()){
         double cost = foot_holds.Future_planarcost ;//+(current_robot_footsteps[0][2]+current_robot_footsteps[1][2]+current_robot_footsteps[2][2]+current_robot_footsteps[3][2])/4)/2;
         if(!foot_holds.collision_halt && !nrecvd_callback3){
@@ -168,7 +170,7 @@ int main(int argc,char** argv){
             //     shift_mode(jnt_st_pub);
             //     walk=false;
             // }
-            if(walk) walk_a_step(jnt_st_pub);
+            if(walk) walk_a_step(jnt_st_pub,listener);
             else trot_a_step(jnt_st_pub);
 
             nrecvd_callback3= true;

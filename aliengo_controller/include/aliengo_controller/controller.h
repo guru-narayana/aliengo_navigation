@@ -35,13 +35,13 @@ extern double walk_marigin;
 extern double walk_mariginx;
 extern double stance_time;
 extern double swing_time;
-extern double walk_base_vel;
+extern double walk_base_time;
 extern double favoured_steplength;
 extern double max_forward_vel;
 extern double max_angular_vel;
 
 extern vector<int> contacts;
-extern double base_pose_yaw;
+extern double base_pose_yaw,base_pose_roll;
 extern double base_pose_y;
 extern double base_pose_z;
 extern double base_pose_x;
@@ -49,5 +49,5 @@ extern vector<vector<double>> current_robot_footsteps;
 extern aliengo_msgs::transition_foothold foot_holds;
 
 extern void trot_a_step(ros::Publisher jnt_st_pub);
-extern void walk_a_step(ros::Publisher jnt_st_pub);
+extern void walk_a_step(ros::Publisher jnt_st_pub,tf::TransformListener& listener);
 #endif

@@ -34,9 +34,54 @@
             <uri>model://sun</uri>
         </include>
         <!-- A ground plane -->
-        <include>
-            <uri>model://ground_plane</uri>
-        </include>
+        <model name='ground_plane_0'>
+            <static>1</static>
+            <link name='link'>
+                <collision name='collision'>
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>100 100</size>
+                    </plane>
+                </geometry>
+                <surface>
+                    <friction>
+                    <ode>
+                        <mu>100000</mu>
+                        <mu2>5000</mu2>
+                    </ode>
+                    </friction>
+                    <bounce/>
+                    <contact>
+                    <ode/>
+                    </contact>
+                </surface>
+                </collision>
+                <visual name='visual'>
+                <cast_shadows>0</cast_shadows>
+                <geometry>
+                    <plane>
+                    <normal>0 0 1</normal>
+                    <size>100 100</size>
+                    </plane>
+                </geometry>
+                <material>
+                    <script>
+                    <uri>file://media/materials/scripts/gazebo.material</uri>
+                    <name>Gazebo/Road  </name>
+                    </script>
+                </material>
+                </visual>
+                <velocity_decay>
+                <linear>0</linear>
+                <angular>0</angular>
+                </velocity_decay>
+                <self_collide>0</self_collide>
+                <kinematic>0</kinematic>
+                <gravity>1</gravity>
+            </link>
+            <pose>0.497681 0 0 0 -0 0</pose>
+            </model>
         <!-- environment blocks, obstacles or stairs -->
 
 
@@ -44,7 +89,7 @@
           <uri>model://turtlebot3_house</uri>
         </include>
 
-    <model name="static_environment">
+    <!-- <model name="static_environment">
         <static>true</static>
             <link name="static_box">
                 <pose>-1.8 -0.7 0.5 0 0 0</pose>
@@ -73,10 +118,10 @@
                     </material>
                 </visual>
             </link>
-    </model>
+    </model> -->
 
 
-    <model name="slant">
+    <!-- <model name="slant">
         <static>true</static>
             <link name="static_box">
                 <pose>-1.8 -3.6 0.4 0.43 0 0</pose>
@@ -105,7 +150,7 @@
                     </material>
                 </visual>
             </link>
-    </model>
+    </model> -->
     <include>
         <uri>model://stairs</uri>
     </include>
