@@ -4,7 +4,7 @@
     <pose frame=''>-3.8 0.009 0 0 -0 0</pose>
     <link name='Stairs_1'>
       <visual name='Stairs_1_Visual_0'>
-        <pose frame=''>-0.375 -0 0.05 0 -0 1.5708</pose>
+        <pose frame=''>-0.625 -0 0.05 0 -0 1.5708</pose>
         <geometry>
           <box>
             <size>2 0.50 0.1</size>
@@ -39,10 +39,10 @@
             <ode/>
             </contact>
         </surface>
-        <pose frame=''>-0.375 -0 0.05 0 -0 1.5708</pose>
+        <pose frame=''>-0.625 -0 0.05 0 -0 1.5708</pose>
       </collision>
       <visual name='Stairs_1_Visual_1'>
-        <pose frame=''>0.125 -0 0.15 0 -0 1.5708</pose>
+        <pose frame=''>-0.125 -0 0.15 0 -0 1.5708</pose>
         <geometry>
           <box>
             <size>2 0.50 0.1</size>
@@ -77,83 +77,7 @@
             <ode/>
             </contact>
         </surface>
-        <pose frame=''>0.125 -0 0.15 0 -0 1.5708</pose>
-      </collision>
-      <visual name='Stairs_1_Visual_2'>
-        <pose frame=''>0.625 0 0.25 0 -0 1.5708</pose>
-        <geometry>
-          <box>
-            <size>2 0.50 0.1</size>
-          </box>
-        </geometry>
-        <material>
-          <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/Grass </name>
-          </script>
-          <ambient>1 1 1 1</ambient>
-        </material>
-        <meta>
-          <layer>0</layer>
-        </meta>
-      </visual>
-      <collision name='Stairs_1_Collision_2'>
-        <geometry>
-          <box>
-            <size>2 0.25 0.1</size>
-          </box>
-        </geometry>
-                        <surface>
-            <friction>
-            <ode>
-                <mu>100000</mu>
-                <mu2>5000</mu2>
-            </ode>
-            </friction>
-            <bounce/>
-            <contact>
-            <ode/>
-            </contact>
-        </surface>
-        <pose frame=''>0.625 0 0.25 0 -0 1.5708</pose>
-      </collision>
-      <visual name='Stairs_1_Visual_3'>
-        <pose frame=''>1.125 0 0.35 0 -0 1.5708</pose>
-        <geometry>
-          <box>
-            <size>2 0.50 0.1</size>
-          </box>
-        </geometry>
-        <material>
-          <script>
-            <uri>file://media/materials/scripts/gazebo.material</uri>
-            <name>Gazebo/WoodFloor</name>
-          </script>
-          <ambient>1 1 1 1</ambient>
-        </material>
-        <meta>
-          <layer>0</layer>
-        </meta>
-      </visual>
-      <collision name='Stairs_1_Collision_3'>
-        <geometry>
-          <box>
-            <size>2 0.50 0.1</size>
-          </box>
-        </geometry>
-                        <surface>
-            <friction>
-            <ode>
-                <mu>100000</mu>
-                <mu2>5000</mu2>
-            </ode>
-            </friction>
-            <bounce/>
-            <contact>
-            <ode/>
-            </contact>
-        </surface>
-        <pose frame=''>1.125 0 0.35 0 -0 1.5708</pose>
+        <pose frame=''>-0.125 -0 0.15 0 -0 1.5708</pose>
       </collision>
     </link>
     <static>1</static>

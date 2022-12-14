@@ -10,15 +10,12 @@ vector<double> traingulate(tf::StampedTransform& P1,tf::StampedTransform& P2,tf:
     double m41 = (P1.getOrigin().y()-p4.point.y)/(P1.getOrigin().x()-p4.point.x),m23 = (P2.getOrigin().y()-P3.getOrigin().y())/(P2.getOrigin().x()-P3.getOrigin().x());
     double c41 = ((P1.getOrigin().x()*p4.point.y)-(p4.point.x*P1.getOrigin().y()))/(P1.getOrigin().x()-p4.point.x),
             c23 = ((P3.getOrigin().y()*P2.getOrigin().x())-(P2.getOrigin().y()*P3.getOrigin().x()))/(P2.getOrigin().x()-P3.getOrigin().x());
-    double pkx = (c41-c23)/(m23-m41), pky = (m23*c41-c23*m41)*(m23-m41);
+    double pkx = (c41-c23)/(m23-m41), pky = (m23*c41-c23*m41)/(m23-m41);
     double pcx = (P1.getOrigin().x() + P3.getOrigin().x() + pkx)/3,pcy = (P1.getOrigin().y() + P3.getOrigin().y() + pky)/3;
-    double ratio_coeff = 0.92;
+    double ratio_coeff = 0.7;
     double pcx1 = pcx*ratio_coeff + pkx*(1-ratio_coeff),pcy1 = pcy*ratio_coeff + pky*(1-ratio_coeff);
-    // cout<<"pc1   :: "<<pcx1<<" "<<pcy1<<endl;
-    // cout<<"pc   :: "<<pcx<<" "<<pcy<<endl;
-    // cout<<"pk   :: "<<pkx<<" "<<pky<<endl;
+
     vector<double> delta_pc  = {pcx1-Pc.getOrigin().x(),pcy1-Pc.getOrigin().y()};
-    cout<<"delta   :: "<<delta_pc[0]<<" "<<delta_pc[1]<<endl;
     return delta_pc;
 }
 
@@ -27,36 +24,36 @@ void move_base1(tf::TransformListener& listener,geometry_msgs::PointStamped&  RL
     try{
     ros::spinOnce();
     tf::StampedTransform FR_tf,FL_tf,RR_tf,RL_tf,base_tf;
-    listener.lookupTransform("/world", "/FL_foot",ros::Time(0), FL_tf);
-    listener.lookupTransform("/world", "/FR_foot",ros::Time(0), FR_tf);
-    listener.lookupTransform("/world", "/RL_foot",ros::Time(0), RL_tf);
-    listener.lookupTransform("/world", "/RR_foot",ros::Time(0), RR_tf);
-    listener.lookupTransform("/world", "/base",ros::Time(0), base_tf);
+    listener.lookupTransform("/map", "/FL_foot",ros::Time(0), FL_tf);
+    listener.lookupTransform("/map", "/FR_foot",ros::Time(0), FR_tf);
+    listener.lookupTransform("/map", "/RL_foot",ros::Time(0), RL_tf);
+    listener.lookupTransform("/map", "/RR_foot",ros::Time(0), RR_tf);
+    listener.lookupTransform("/map", "/base",ros::Time(0), base_tf);
     vector<double> pc_delta = traingulate(FR_tf,FL_tf,RR_tf,RL1,base_tf);
 
 
     geometry_msgs::PointStamped FL1,FR1,RL1,RR1;
     geometry_msgs::PointStamped FL1b,FR1b,RL1b,RR1b;
 
-    FL1.header.frame_id = "/world";
+    FL1.header.frame_id = "/map";
     FL1.header.stamp = ros::Time();
     FL1.point.x = FL_tf.getOrigin().x()-pc_delta[0];
     FL1.point.y = FL_tf.getOrigin().y()-pc_delta[1];
     FL1.point.z = FL_tf.getOrigin().z();
 
-    FR1.header.frame_id = "/world";
+    FR1.header.frame_id = "/map";
     FR1.header.stamp = ros::Time();
     FR1.point.x = FR_tf.getOrigin().x()-pc_delta[0];
     FR1.point.y = FR_tf.getOrigin().y()-pc_delta[1];
     FR1.point.z = FR_tf.getOrigin().z();
 
-    RL1.header.frame_id = "/world";
+    RL1.header.frame_id = "/map";
     RL1.header.stamp = ros::Time();
     RL1.point.x = RL_tf.getOrigin().x()-pc_delta[0];
     RL1.point.y = RL_tf.getOrigin().y()-pc_delta[1];
     RL1.point.z = RL_tf.getOrigin().z();
 
-    RR1.header.frame_id = "/world";
+    RR1.header.frame_id = "/map";
     RR1.header.stamp = ros::Time();
     RR1.point.x = RR_tf.getOrigin().x()-pc_delta[0];
     RR1.point.y = RR_tf.getOrigin().y()-pc_delta[1];
@@ -81,19 +78,19 @@ void move_base1(tf::TransformListener& listener,geometry_msgs::PointStamped&  RL
         double u = (ros::Time::now().toSec()-init_time)/(walk_base_time);
         vector<double> FL_cnt_pos = {get_cubic_point(FLb_tf.getOrigin().x(),FL1b.point.x,u),
                                         get_cubic_point(FLb_tf.getOrigin().y(),FL1b.point.y,u),
-                                        FLb_tf.getOrigin().z()},
+                                        get_cubic_point(FLb_tf.getOrigin().z(),FL1b.point.z,u)},
 
                         RL_cnt_pos = {get_cubic_point(RLb_tf.getOrigin().x(),RL1b.point.x,u),
                                         get_cubic_point(RLb_tf.getOrigin().y(),RL1b.point.y,u),
-                                            RLb_tf.getOrigin().z()},
+                                            get_cubic_point(RLb_tf.getOrigin().z(),RL1b.point.z,u)},
 
                         FR_cnt_pos = {get_cubic_point(FRb_tf.getOrigin().x(),FR1b.point.x,u),
                                         get_cubic_point(FRb_tf.getOrigin().y(),FR1b.point.y,u),
-                                            FRb_tf.getOrigin().z()},
+                                            get_cubic_point(FRb_tf.getOrigin().z(),FR1b.point.z,u)},
 
                         RR_cnt_pos = {get_cubic_point(RRb_tf.getOrigin().x(),RR1b.point.x,u),
                                         get_cubic_point(RRb_tf.getOrigin().y(),RR1b.point.y,u),
-                                            RRb_tf.getOrigin().z()};
+                                            get_cubic_point(RRb_tf.getOrigin().z(),RR1b.point.z,u)};
 
         vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(FL_cnt_pos)),
                         RR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToRR(RR_cnt_pos)),
@@ -131,36 +128,36 @@ void move_base2(tf::TransformListener& listener,geometry_msgs::PointStamped&  RR
     try{
     ros::spinOnce();
     tf::StampedTransform FR_tf,FL_tf,RR_tf,RL_tf,base_tf;
-    listener.lookupTransform("/world", "/FL_foot",ros::Time(0), FL_tf);
-    listener.lookupTransform("/world", "/FR_foot",ros::Time(0), FR_tf);
-    listener.lookupTransform("/world", "/RL_foot",ros::Time(0), RL_tf);
-    listener.lookupTransform("/world", "/RR_foot",ros::Time(0), RR_tf);
-    listener.lookupTransform("/world", "/base",ros::Time(0), base_tf);
+    listener.lookupTransform("/map", "/FL_foot",ros::Time(0), FL_tf);
+    listener.lookupTransform("/map", "/FR_foot",ros::Time(0), FR_tf);
+    listener.lookupTransform("/map", "/RL_foot",ros::Time(0), RL_tf);
+    listener.lookupTransform("/map", "/RR_foot",ros::Time(0), RR_tf);
+    listener.lookupTransform("/map", "/base",ros::Time(0), base_tf);
     vector<double> pc_delta = traingulate(FL_tf,FR_tf,RL_tf,RR1,base_tf);
 
 
     geometry_msgs::PointStamped FL1,FR1,RL1,RR1;
     geometry_msgs::PointStamped FL1b,FR1b,RL1b,RR1b;
 
-    FL1.header.frame_id = "/world";
+    FL1.header.frame_id = "/map";
     FL1.header.stamp = ros::Time();
     FL1.point.x = FL_tf.getOrigin().x()-pc_delta[0];
     FL1.point.y = FL_tf.getOrigin().y()-pc_delta[1];
     FL1.point.z = FL_tf.getOrigin().z();
 
-    FR1.header.frame_id = "/world";
+    FR1.header.frame_id = "/map";
     FR1.header.stamp = ros::Time();
     FR1.point.x = FR_tf.getOrigin().x()-pc_delta[0];
     FR1.point.y = FR_tf.getOrigin().y()-pc_delta[1];
     FR1.point.z = FR_tf.getOrigin().z();
 
-    RL1.header.frame_id = "/world";
+    RL1.header.frame_id = "/map";
     RL1.header.stamp = ros::Time();
     RL1.point.x = RL_tf.getOrigin().x()-pc_delta[0];
     RL1.point.y = RL_tf.getOrigin().y()-pc_delta[1];
     RL1.point.z = RL_tf.getOrigin().z();
 
-    RR1.header.frame_id = "/world";
+    RR1.header.frame_id = "/map";
     RR1.header.stamp = ros::Time();
     RR1.point.x = RR_tf.getOrigin().x()-pc_delta[0];
     RR1.point.y = RR_tf.getOrigin().y()-pc_delta[1];
@@ -185,19 +182,19 @@ void move_base2(tf::TransformListener& listener,geometry_msgs::PointStamped&  RR
         double u = (ros::Time::now().toSec()-init_time)/(2*walk_base_time);
         vector<double> FL_cnt_pos = {get_cubic_point(FLb_tf.getOrigin().x(),FL1b.point.x,u),
                                         get_cubic_point(FLb_tf.getOrigin().y(),FL1b.point.y,u),
-                                        FLb_tf.getOrigin().z()},
+                                        get_cubic_point(FLb_tf.getOrigin().z(),FL1b.point.z,u)},
 
                         RL_cnt_pos = {get_cubic_point(RLb_tf.getOrigin().x(),RL1b.point.x,u),
                                         get_cubic_point(RLb_tf.getOrigin().y(),RL1b.point.y,u),
-                                            RLb_tf.getOrigin().z()},
+                                            get_cubic_point(RLb_tf.getOrigin().z(),RL1b.point.z,u)},
 
                         FR_cnt_pos = {get_cubic_point(FRb_tf.getOrigin().x(),FR1b.point.x,u),
                                         get_cubic_point(FRb_tf.getOrigin().y(),FR1b.point.y,u),
-                                            FRb_tf.getOrigin().z()},
+                                            get_cubic_point(FRb_tf.getOrigin().z(),FR1b.point.z,u)},
 
                         RR_cnt_pos = {get_cubic_point(RRb_tf.getOrigin().x(),RR1b.point.x,u),
                                         get_cubic_point(RRb_tf.getOrigin().y(),RR1b.point.y,u),
-                                            RRb_tf.getOrigin().z()};
+                                            get_cubic_point(RRb_tf.getOrigin().z(),RR1b.point.z,u)};
 
         vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(FL_cnt_pos)),
                         RR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToRR(RR_cnt_pos)),
@@ -230,41 +227,43 @@ void move_base2(tf::TransformListener& listener,geometry_msgs::PointStamped&  RR
 
 }
 
-void move_base3(tf::TransformListener& listener,geometry_msgs::PointStamped&  base_final_world,ros::Publisher jnt_st_pub){
+void move_base3(tf::TransformListener& listener,geometry_msgs::PointStamped&  base_final_map,ros::Publisher jnt_st_pub){
     while(ros::ok()){
     try{
     ros::spinOnce();
     tf::StampedTransform FR_tf,FL_tf,RR_tf,RL_tf,base_tf;
-    listener.lookupTransform("/world", "/FL_foot",ros::Time(0), FL_tf);
-    listener.lookupTransform("/world", "/FR_foot",ros::Time(0), FR_tf);
-    listener.lookupTransform("/world", "/RL_foot",ros::Time(0), RL_tf);
-    listener.lookupTransform("/world", "/RR_foot",ros::Time(0), RR_tf);
-    listener.lookupTransform("/world", "/base",ros::Time(0), base_tf);
-    vector<double> pc_delta = {base_final_world.point.x - base_tf.getOrigin().x(),base_final_world.point.y - base_tf.getOrigin().y()};
+    listener.lookupTransform("/map", "/FL_foot",ros::Time(0), FL_tf);
+    listener.lookupTransform("/map", "/FR_foot",ros::Time(0), FR_tf);
+    listener.lookupTransform("/map", "/RL_foot",ros::Time(0), RL_tf);
+    listener.lookupTransform("/map", "/RR_foot",ros::Time(0), RR_tf);
+    listener.lookupTransform("/map", "/base",ros::Time(0), base_tf);
+
+    vector<double> pc_delta = {(FL_tf.getOrigin().x() + FR_tf.getOrigin().x()+RL_tf.getOrigin().x()+RR_tf.getOrigin().x())/4 - base_tf.getOrigin().x(),
+                               (FL_tf.getOrigin().y() + FR_tf.getOrigin().y()+RL_tf.getOrigin().y()+RR_tf.getOrigin().y())/4 - base_tf.getOrigin().y()};
 
 
     geometry_msgs::PointStamped FL1,FR1,RL1,RR1;
     geometry_msgs::PointStamped FL1b,FR1b,RL1b,RR1b;
 
-    FL1.header.frame_id = "/world";
+    FL1.header.frame_id = "/map";
     FL1.header.stamp = ros::Time();
     FL1.point.x = FL_tf.getOrigin().x()-pc_delta[0];
     FL1.point.y = FL_tf.getOrigin().y()-pc_delta[1];
     FL1.point.z = FL_tf.getOrigin().z();
 
-    FR1.header.frame_id = "/world";
+    FR1.header.frame_id = "/map";
     FR1.header.stamp = ros::Time();
     FR1.point.x = FR_tf.getOrigin().x()-pc_delta[0];
     FR1.point.y = FR_tf.getOrigin().y()-pc_delta[1];
     FR1.point.z = FR_tf.getOrigin().z();
 
-    RL1.header.frame_id = "/world";
+    RL1.header.frame_id = "/map";
     RL1.header.stamp = ros::Time();
     RL1.point.x = RL_tf.getOrigin().x()-pc_delta[0];
     RL1.point.y = RL_tf.getOrigin().y()-pc_delta[1];
     RL1.point.z = RL_tf.getOrigin().z();
 
-    RR1.header.frame_id = "/world";
+    RR1.header.frame_id = "/map";
     RR1.header.stamp = ros::Time();
     RR1.point.x = RR_tf.getOrigin().x()-pc_delta[0];
     RR1.point.y = RR_tf.getOrigin().y()-pc_delta[1];
@@ -285,23 +284,23 @@ void move_base3(tf::TransformListener& listener,geometry_msgs::PointStamped&  ba
     double init_time = ros::Time::now().toSec();
     ros::Rate frequency(controller_rate);
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
-    while(ros::ok()&&(ros::Time::now().toSec()-init_time<=2*walk_base_time)){
-        double u = (ros::Time::now().toSec()-init_time)/(2*walk_base_time);
+    while(ros::ok()&&(ros::Time::now().toSec()-init_time<=walk_base_time)){
+        double u = (ros::Time::now().toSec()-init_time)/(walk_base_time);
         vector<double> FL_cnt_pos = {get_cubic_point(FLb_tf.getOrigin().x(),FL1b.point.x,u),
                                         get_cubic_point(FLb_tf.getOrigin().y(),FL1b.point.y,u),
-                                        FLb_tf.getOrigin().z()},
+                                        get_cubic_point(FLb_tf.getOrigin().z(),FL1b.point.z,u)},
 
                         RL_cnt_pos = {get_cubic_point(RLb_tf.getOrigin().x(),RL1b.point.x,u),
                                         get_cubic_point(RLb_tf.getOrigin().y(),RL1b.point.y,u),
-                                            RLb_tf.getOrigin().z()},
+                                            get_cubic_point(RLb_tf.getOrigin().z(),RL1b.point.z,u)},
 
                         FR_cnt_pos = {get_cubic_point(FRb_tf.getOrigin().x(),FR1b.point.x,u),
                                         get_cubic_point(FRb_tf.getOrigin().y(),FR1b.point.y,u),
-                                            FRb_tf.getOrigin().z()},
+                                            get_cubic_point(FRb_tf.getOrigin().z(),FR1b.point.z,u)},
 
                         RR_cnt_pos = {get_cubic_point(RRb_tf.getOrigin().x(),RR1b.point.x,u),
                                         get_cubic_point(RRb_tf.getOrigin().y(),RR1b.point.y,u),
-                                            RRb_tf.getOrigin().z()};
+                                            get_cubic_point(RRb_tf.getOrigin().z(),RR1b.point.z,u)};
 
         vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(FL_cnt_pos)),
                         RR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToRR(RR_cnt_pos)),
@@ -398,10 +397,10 @@ void swng(ros::Publisher jnt_st_pub,vector<double>& iniat,vector<double> finl,in
     base_point.point.x = cnt_pos[0];
     base_point.point.y = cnt_pos[1];
     base_point.point.z = cnt_pos[2];
-    geometry_msgs::PointStamped world_point;
-    listener.transformPoint("/map", base_point, world_point);
-    world_point.point.z-=0.23;
-    listener.transformPoint("/base", world_point, base_point);
+    geometry_msgs::PointStamped map_point;
+    listener.transformPoint("/map", base_point, map_point);
+    map_point.point.z-=0.23;
+    listener.transformPoint("/base", map_point, base_point);
 
 
     init_time = ros::Time::now().toSec();
@@ -488,7 +487,7 @@ void rotate_base(ros::Publisher jnt_st_pub,vector<double>&  FL_init,vector<doubl
                         RL = {RL_init[0]*cos(omega) - RL_init[1]*sin(omega) - RL_init[0] ,RL_init[0]*sin(omega) + RL_init[1]*cos(omega) - RL_init[1]},
                         FR = {FR_init[0]*cos(omega) - FR_init[1]*sin(omega) - FR_init[0] ,FR_init[0]*sin(omega) + FR_init[1]*cos(omega) - FR_init[1]},
                         RR = {RR_init[0]*cos(omega) - RR_init[1]*sin(omega) - RR_init[0] ,RR_init[0]*sin(omega) + RR_init[1]*cos(omega) - RR_init[1]};
-        double T = 1.5*walk_base_time;
+        double T = 1.0;
         quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
         double init_time = ros::Time::now().toSec();
         ros::Rate frequency(controller_rate);
@@ -529,15 +528,13 @@ void adjust_pitch(ros::Publisher jnt_st_pub){
     bool front = false,back=false;
     if(abs(FL_init[2])<(robot_base_height-0.01) && abs(FR_init[2])<(robot_base_height-0.01) &&  abs(FL_init[2]-FR_init[2])<0.04) front = true;
     if(abs(RL_init[2])<(robot_base_height-0.01) && abs(RR_init[2])<(robot_base_height-0.01) &&  abs(RL_init[2]-RR_init[2])<0.04) back = true;
-    if(front) cout<<"height"<<endl;
     
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
     double init_time = ros::Time::now().toSec();
     ros::Rate frequency(controller_rate);
-    double T = 0.3;
+    double T = max(  abs(FL_init[2]+robot_base_height)/robot_verti_vel,  abs(RL_init[2]+robot_base_height)/robot_verti_vel);
     while(ros::ok()&&(ros::Time::now().toSec()-init_time<=T) && (front || back)){
         double u = (ros::Time::now().toSec()-init_time)/T;
-        //cout<<u<<endl;
         if(front){
             FL_cnt_pos[2] = FL_init[2]*(1-u) -(robot_base_height)*u;
             FR_cnt_pos[2] = FR_init[2]*(1-u) -(robot_base_height)*u;
@@ -577,14 +574,12 @@ void adjust_roll(ros::Publisher jnt_st_pub){
                 RL_cnt_pos = current_robot_footsteps[2],RR_cnt_pos = current_robot_footsteps[3];
     if(base_pose_roll !=0){
         double delta = sin(base_pose_roll)*((robot_config[1] + 2*robot_config[2]))/2;
-        cout<<delta<<endl;
         quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
         double init_time = ros::Time::now().toSec();
         ros::Rate frequency(controller_rate);
-        double T = 0.3;
+        double T = 0.45;
         while(ros::ok()&&(ros::Time::now().toSec()-init_time<=T)){
             double u = (ros::Time::now().toSec()-init_time)/T;
-            //cout<<u<<endl;
                 FL_cnt_pos[2] = FL_init[2]*(1-u) +(FL_init[2]+delta)*u;
                 FR_cnt_pos[2] = FR_init[2]*(1-u) +( FR_init[2]-delta)*u;
                 vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(FL_cnt_pos)),
@@ -629,7 +624,7 @@ void walk_a_step(ros::Publisher jnt_st_pub,tf::TransformListener& listener){
 
 
     geometry_msgs::PointStamped base_final_point;
-    base_final_point.header.frame_id = "world";
+    base_final_point.header.frame_id = "map";
     base_final_point.header.stamp = ros::Time();
     base_final_point.point.x = X;
     base_final_point.point.y = Y;
@@ -638,32 +633,38 @@ void walk_a_step(ros::Publisher jnt_st_pub,tf::TransformListener& listener){
 
     geometry_msgs::PointStamped FL1_point,FR1_point,RL1_point,RR1_point;
     geometry_msgs::PointStamped FL1b_point,FR1b_point,RL1b_point,RR1b_point;
-    FL1_point.header.frame_id = "/world";
+    FL1_point.header.frame_id = "/map";
     FL1_point.header.stamp = ros::Time();
     FL1_point.point.x = FL1[0];
     FL1_point.point.y = FL1[1];
     FL1_point.point.z = FL1[2];
 
-    FR1_point.header.frame_id = "/world";
+    FR1_point.header.frame_id = "/map";
     FR1_point.header.stamp = ros::Time();
     FR1_point.point.x = FR1[0];
     FR1_point.point.y = FR1[1];
     FR1_point.point.z = FR1[2];
 
-    RL1_point.header.frame_id = "/world";
+    RL1_point.header.frame_id = "/map";
     RL1_point.header.stamp = ros::Time();
     RL1_point.point.x = RL1[0];
     RL1_point.point.y = RL1[1];
     RL1_point.point.z = RL1[2];
 
-    RR1_point.header.frame_id = "/world";
+    RR1_point.header.frame_id = "/map";
     RR1_point.header.stamp = ros::Time();
     RR1_point.point.x = RR1[0];
     RR1_point.point.y = RR1[1];
     RR1_point.point.z = RR1[2];
 
+    ros::spinOnce();
+
+    ros::Duration(0.1).sleep();
+    FL_init = current_robot_footsteps[0];FR_init = current_robot_footsteps[1]; // change to local base
+                    RL_init = current_robot_footsteps[2];RR_init = current_robot_footsteps[3];
+    if(abs(omega)>0.005) rotate_base(jnt_st_pub,FL_init,FR_init,RL_init,RR_init,omega/2);  
+
     move_base1(listener,RL1_point,jnt_st_pub);
-    
     // move_base(-walk_marigin,walk_marigin/walk_base_vel,FL_init,FR_init,RL_init,RR_init,jnt_st_pub,FL1,FR1,RL1,RR1,X + walk_mariginx);
 
     listener.transformPoint("/base", RL1_point, RL1b_point);
@@ -689,13 +690,8 @@ void walk_a_step(ros::Publisher jnt_st_pub,tf::TransformListener& listener){
 
     ros::Duration(0.05).sleep();
     move_base3(listener,base_final_point,jnt_st_pub);
-//    move_base(-walk_marigin+Y,walk_base_time,FL_init,FR_init,RL_init,RR_init,jnt_st_pub,FL1,FR1,RL1,RR1,-walk_mariginx);
-    FL_init = current_robot_footsteps[0];FR_init = current_robot_footsteps[1]; // change to local base
-    RL_init = current_robot_footsteps[2];RR_init = current_robot_footsteps[3];
-    ros::Duration(0.05).sleep();
-//    rotate_base(jnt_st_pub,FL_init,FR_init,RL_init,RR_init,omega);  
-    ros::Duration(0.05).sleep();
     adjust_pitch(jnt_st_pub);
     adjust_roll(jnt_st_pub);
+
 }
 

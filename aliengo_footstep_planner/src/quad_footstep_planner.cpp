@@ -18,7 +18,7 @@ vector<vector<double>> next_step(double R,double theta,double v,double w,double 
     vector<double> vr_vect={0};
     while(SL<max_steplength){
         SL += resolution_steplength;
-        if(v==0) SL ==0.03;
+        if(v==0) SL ==0.02;
         alpha = 2*asin(SL/(2*R));
         double theta0(0);
         switch(foot_type){
@@ -78,9 +78,8 @@ vector<vector<double>> next_step(double R,double theta,double v,double w,double 
         double x1 = cos(yaw)*(x+base_x) - sin(yaw)*(y+base_y) + base_pose_x;
         double y1 = sin(yaw)*(x+base_x) + cos(yaw)*(y+base_y) + base_pose_y;
         double height = elev_map.atPosition("elevation_inpainted",Position(x1,y1));
-        double surf_normal = get_edge_cost(Position(x1,y1),0.04);
+        double surf_normal = get_edge_cost(Position(x1,y1),0.02);
         double cost = height*obstacle_stepcostFactor + abs(SL-favoured_steplength)*prefered_stepcostFactor - surf_normal*edge_costFactor;
-        cout<<cost<<endl;
 
         if(cost<min_cost){
             Foot_1 = {x1,y1,height};
@@ -128,19 +127,46 @@ double get_globalPlan_cost(double x,double y,int sample_points){
 }
 
 
+double get_planar_cost(aliengo_msgs::transition_foothold transn_footholds){
+    vector<double> arr = {transn_footholds.FL1.z,transn_footholds.FR1.z ,transn_footholds.RR1.z ,transn_footholds.RL1.z ,
+        transn_footholds.FL2.z ,transn_footholds.FR2.z ,transn_footholds.RR2.z ,transn_footholds.RL2.z};
+    
+    double sum = 0;
+    for(int i=0;i<8;i++)
+    {
+        sum = sum + arr[i];
+    }
+
+    double mean = sum/8, sum2 = 0.0;
+
+    for(int i=0;i<8;i++)
+    {
+        sum2 = sum2 + abs(arr[i]-mean)*abs(arr[i]-mean);
+    }
+
+    return sum2;
+}
+
+
 void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::Publisher next_step_pub){
     aliengo_msgs::transition_foothold transn_footholds;
+    ros::WallTime  secs;
     if(using_joystick && (joystick_vals[0]!=0 || joystick_vals[1]!=0)){
+
+        secs =ros::WallTime::now();
+
         double collision_cost = collision_check(false);
-        // if(collision_cost>0.0){
-        //     transn_footholds.vel1 = 0.0;
-        //     transn_footholds.vel2 = 0.0;
-        //     next_step_pub.publish(transn_footholds);
-        //     return;
-        // }
+        std::cout << std::setprecision(2);
+        cout<<"Collision Time  "<<(ros::WallTime::now() - secs).toNSec() * 1e-6;
+
+        if(collision_cost>collision_threshold){
+            transn_footholds.vel1 = 0.0;
+            transn_footholds.vel2 = 0.0;
+            next_step_pub.publish(transn_footholds);
+            return;
+        }
     }
     else if(!using_joystick && recived_global_plan){
-        // cout<<global_path_poses[0].pose.position.x<<endl;
         get_optim_vels();
     }
     else{
@@ -158,8 +184,11 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
 
     double R(sqrt(pow(length/2,2)+pow(width/2,2))),
             theta1(atan(length/width));
+
+    
     if(w!=0 || v!=0){
         double time_prd(0);
+        secs =ros::WallTime::now();
         if (w==0 && v!=0) time_prd = abs((steps_horizon*favoured_steplength)/v);
         else if(w!=0 && abs(v/w)<=(width*2/2.2)) time_prd = abs(2*steps_horizon*asin(favoured_steplength/(2*R))/w);
         else if(w!=0 && abs(v/w)>(width*2/2.2)) time_prd = abs(2*steps_horizon*asin((favoured_steplength*w)/(2*v))/w);
@@ -189,12 +218,10 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
             RR_foot_holds1.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RR_0,2)[0]);
             RL_foot_holds1.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RL_0,3)[0]);
         }
-        double planar_cost(0);
-        for(int i=0;i<steps_horizon;i++){
-        planar_cost+= (FL_foot_holds1[i][2]+FR_foot_holds1[i][2])/2;
-        }
+        std::cout << std::setprecision(2);
+        cout<<"      foothold time "<< (ros::WallTime::now() - secs).toNSec() * 1e-6<<endl;
+
         
-        transn_footholds.Future_planarcost = planar_cost/steps_horizon;
         transn_footholds.FL1.x = FL_foot_holds1[0][0];
         transn_footholds.FL1.y = FL_foot_holds1[0][1];
         transn_footholds.FL1.z = FL_foot_holds1[0][2];
@@ -220,6 +247,7 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
         transn_footholds.RR2.y = RR_foot_holds1[1][1];
         transn_footholds.RR2.z = RR_foot_holds1[1][2];
 
+        transn_footholds.Future_planarcost = get_planar_cost(transn_footholds);
         transn_footholds.vel1 = (max(0.0,(joystick_vals[1]*max_forward_vel)));
         transn_footholds.vel2 = (joystick_vals[0]*max_angular_vel);
         next_step_pub.publish(transn_footholds);
@@ -323,7 +351,8 @@ double collision_check(bool return_totalcost){
     double time_period = (max_steplength*horizon_length)/max_forward_vel;
     int total_points = 1;
     int collision_points = 0;
-    for (int i=1;i<=sample_points;i++){
+    double init_height = 0;
+    for (int i=0;i<=sample_points;i++){
         bool collision(false);
         double t = i*time_period/sample_points;
         if(w != 0){
@@ -352,10 +381,20 @@ double collision_check(bool return_totalcost){
         polygon.addVertex(Position( x2,  y2));
         polygon.addVertex(Position( x3,  y3));
         polygon.addVertex(Position( x4,  y4));
+        if (i==0){
+            double init = 0,count = 0;
+            for (grid_map::PolygonIterator iterator(elev_map,polygon); !iterator.isPastEnd(); ++iterator) {
+            const Index index(*iterator);
+            init+= elev_map.at("elevation_inpainted", *iterator);
+            count++;
+            }
+            init_height = init/count;
+
+        }
         for (grid_map::PolygonIterator iterator(elev_map,polygon); !iterator.isPastEnd(); ++iterator) {
             const Index index(*iterator);
             if(elev_map.at("elevation_inpainted", *iterator) == elev_map.at("elevation_inpainted", *iterator)){
-            if( elev_map.at("elevation_inpainted", *iterator) > collision_point_height) 
+            if( abs(elev_map.at("elevation_inpainted", *iterator)-init_height) > collision_point_height) 
             {
                 collision_points+=1;
 

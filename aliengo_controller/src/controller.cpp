@@ -17,7 +17,7 @@ double walk_marigin;
 double walk_mariginx;
 double swing_time;
 double walk_base_time;
-double favoured_steplength;
+double favoured_steplength =0.03;
 double max_forward_vel;
 double max_angular_vel;
 //Regular updated params
@@ -34,7 +34,7 @@ aliengo_msgs::transition_foothold foot_holds;
 
 //conditional params
 bool nrecvd_callback1 = true,nrecvd_callback2 = true,nrecvd_callback3 = true;
-
+bool walk = true;
 
 
 
@@ -118,20 +118,36 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/robot_base_frame",robot_base_frame,  string("/base"));
     nh.param("/robot_config/max_forward_vel",max_forward_vel,  0.18);
     nh.param("/robot_config/max_angular_vel",max_angular_vel, 0.872); // rad/s
+    nh.param("/robot_config/walk",walk, true);   
 
 
-
-    nh.param("robot_verti_vel",robot_verti_vel, 0.05);
-    nh.param("robot_base_height",robot_base_height, 0.35);
-    nh.param("robot_swing_height",robot_swing_height, 0.08);
+    nh.param("robot_verti_vel",robot_verti_vel, 0.1);
+    nh.param("robot_base_height",robot_base_height, 0.31);
+    nh.param("robot_swing_height",robot_swing_height, 0.04);
     nh.param("controller_rate",controller_rate, 500);
 
     nh.param("walk_mariginy",walk_marigin, 0.07);
     nh.param("walk_mariginx",walk_mariginx, 0.0);
-    nh.param("walk_swing_time",swing_time, 1.0);
-    nh.param("walk_base_time",walk_base_time, 0.85);
-    nh.param("favoured_steplength", favoured_steplength, 0.07);
+    nh.param("walk_swing_time",swing_time, 0.35);
+    nh.param("walk_base_time",walk_base_time, 0.5);
+    //nh.param("favoured_steplength", favoured_steplength, 0.07);
 
+}
+double get_vince(vector<double> arr){
+    double sum = 0;
+    for(int i=0;i<4;i++)
+    {
+        sum = sum + arr[i];
+    }
+
+    double mean = sum/4, sum2 = 0.0;
+
+    for(int i=0;i<4;i++)
+    {
+        sum2 = sum2 + abs(arr[i]-mean)*abs(arr[i]-mean);
+    }
+
+    return sum2;
 }
 
 int main(int argc,char** argv){
@@ -154,22 +170,36 @@ int main(int argc,char** argv){
     //shift_mode(jnt_st_pub);
     ros::Duration(0.5).sleep();
     ros::spinOnce();
-    bool walk = true;
     tf::TransformListener listener;
+    nh.param("/robot_config/walk",walk, true);   
+    ros::Duration(1.5).sleep();
+
     while(ros::ok()){
-        double cost = foot_holds.Future_planarcost ;//+(current_robot_footsteps[0][2]+current_robot_footsteps[1][2]+current_robot_footsteps[2][2]+current_robot_footsteps[3][2])/4)/2;
+        tf::StampedTransform FR_tf,FL_tf,RR_tf,RL_tf,base_tf;
+        listener.lookupTransform("/map", "/FL_foot",ros::Time(0), FL_tf);
+        listener.lookupTransform("/map", "/FR_foot",ros::Time(0), FR_tf);
+        listener.lookupTransform("/map", "/RL_foot",ros::Time(0), RL_tf);
+        listener.lookupTransform("/map", "/RR_foot",ros::Time(0), RR_tf);
+        
+        double cost = foot_holds.Future_planarcost;
         if(!foot_holds.collision_halt && !nrecvd_callback3){
-            // if(cost>0.026 && walk==false){
-            //     ros::Duration(1).sleep();
-            //     height_adjust(jnt_st_pub);
-            //     ros::Duration(0.5).sleep();
-            //     shift_mode(jnt_st_pub);
-            //     walk=true;
-            // }
-            // else if(cost<=0.026 && walk==true){
-            //     shift_mode(jnt_st_pub);
-            //     walk=false;
-            // }
+            
+            //cout<<foot_holds.Future_planarcost<<endl;
+            vector<double> variance_arr = {FL_tf.getOrigin().z(), FR_tf.getOrigin().z(), RL_tf.getOrigin().z(), RR_tf.getOrigin().z()};
+            cout<<get_vince(variance_arr)<<"  "<<cost<<endl;
+
+            if(cost>0.01 && walk==false){
+                ros::Duration(1.5).sleep();
+                shift_mode(jnt_st_pub);
+                //height_adjust(jnt_st_pub);
+                walk=true;
+            }
+            else if(cost<=0.01 && walk==true && get_vince(variance_arr)< 0.002){
+                //shift_mode(jnt_st_pub);
+                ros::Duration(0.5).sleep();
+                walk=false;
+            }
+            
             if(walk) walk_a_step(jnt_st_pub,listener);
             else trot_a_step(jnt_st_pub);
 

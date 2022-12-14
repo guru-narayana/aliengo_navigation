@@ -68,7 +68,7 @@
                 <material>
                     <script>
                     <uri>file://media/materials/scripts/gazebo.material</uri>
-                    <name>Gazebo/Road  </name>
+                    <name>Gazebo/GreyTransparent  </name>
                     </script>
                 </material>
                 </visual>
@@ -85,25 +85,22 @@
         <!-- environment blocks, obstacles or stairs -->
 
 
-       <include>
-          <uri>model://turtlebot3_house</uri>
-        </include>
 
-    <!-- <model name="static_environment">
+    <model name="static_environment">
         <static>true</static>
             <link name="static_box">
-                <pose>-1.8 -0.7 0.5 0 0 0</pose>
+                <pose>-2.2 -0.7 0.14 0 0 0</pose>
                 <collision name="static_box_collision">
                     <geometry>
                         <box>
-                            <size>3 4 0.85</size>
+                            <size>3 4 0.28</size>
                         </box>
                     </geometry>
                 </collision>
                 <visual name="static_box_visual">
                     <geometry>
                         <box>
-                            <size>3 4 0.85</size>
+                            <size>3 4 0.28</size>
                         </box>
                     </geometry>
                     <material>
@@ -118,7 +115,7 @@
                     </material>
                 </visual>
             </link>
-    </model> -->
+    </model>
 
 
     <!-- <model name="slant">

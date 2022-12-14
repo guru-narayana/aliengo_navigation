@@ -7,7 +7,7 @@ robot_config:
   collision_rect_length: 0.65
   collision_rect_width: 0.3
   collision_point_height: 0.2
-  collision_threshold: 20.5
+  collision_threshold: 0.01
   collision_free_threshold: 99.5
   max_forward_vel:  0.18
   min_angular_vel: -0.1

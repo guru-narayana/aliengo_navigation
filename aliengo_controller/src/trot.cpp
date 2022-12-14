@@ -21,7 +21,6 @@ void trot_a_step(ros::Publisher jnt_st_pub){
         return;
 
     }
-    cout<<v<<endl;
     if(swing){ // swing FL
         double thetaFR,thetaRL;
         vector<double> tempFR(2,0),tempRL(2,0);
@@ -99,7 +98,7 @@ void trot_a_step(ros::Publisher jnt_st_pub){
                 thetaFL1 = atan2((v + vr*sin(thetaFL)),(vr*cos(thetaFL)));
         vector<double> FL = {FL0[0] + SL*sin(thetaFL1)-FL_init[0],FL0[1] + SL*cos(thetaFL1)-FL_init[1]},
                         RR = {RR0[0] + SL*sin(thetaRR1)-RR_init[0],RR0[1] + SL*cos(thetaRR1)-RR_init[1]};
-        double T = max(min(SL/sqrt(pow(v + vr*sin(thetaFL),2)+pow(vr*cos(thetaFL),2)),1.0),0.1);
+        double T = max(min(SL/sqrt(pow(v + vr*sin(thetaFL),2)+pow(vr*cos(thetaFL),2)),0.3),0.05);
         vector<vector<double>> A_fr = generate_swing_coefs(FR_init,FR0),
                                 A_rl = generate_swing_coefs(RL_init,RL0);
         double init_time = ros::Time::now().toSec();

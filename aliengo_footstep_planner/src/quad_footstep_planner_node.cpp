@@ -187,6 +187,7 @@ int main(int argc, char** argv)
     if(!using_joystick) joy_sub.shutdown();
     while (ros::ok()){
         ros::spinOnce();
+        get_params(nh);
         if(map_available && (contacts >= 2)){
         plan_footsteps(poly_pub,foot_marker_pub,next_foot_pub);
         loop_rate.sleep();

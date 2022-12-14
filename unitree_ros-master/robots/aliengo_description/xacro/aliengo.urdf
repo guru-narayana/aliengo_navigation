@@ -175,14 +175,21 @@
     <self_collide>0</self_collide>
   </gazebo>
   <gazebo reference="FL_foot">
+    <mu1>100</mu1>
+    <mu2>100</mu2>
     <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
-    <kp>100000.0</kp>
-    <kd>1.0</kd>
-    <mu1>38</mu1>
-    <mu2>38</mu2>
-    <minDepth>0</minDepth>
-    <maxVel>0.0</maxVel>
+    <kp value="1000000.0"/>
+    <kd value="1.0"/>
+    <collision>
+      <surface>
+        <contact>
+          <ode>
+            <min_depth>0.01</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
   </gazebo>
   <!-- FR leg -->
   <gazebo reference="FR_hip">
@@ -204,14 +211,21 @@
     <self_collide>0</self_collide>
   </gazebo>
   <gazebo reference="FR_foot">
+    <mu1>100</mu1>
+    <mu2>100</mu2>
     <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
-    <kp>100000.0</kp>
-    <kd>1.0</kd>
-    <mu1>38</mu1>
-    <mu2>38</mu2>
-    <minDepth>0</minDepth>
-    <maxVel>0.0</maxVel>
+    <kp value="1000000.0"/>
+    <kd value="1.0"/>
+    <collision>
+      <surface>
+        <contact>
+          <ode>
+            <min_depth>0.01</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
   </gazebo>
   <!-- RL leg -->
   <gazebo reference="RL_hip">
@@ -233,15 +247,22 @@
     <self_collide>0</self_collide>
   </gazebo>
   <gazebo reference="RL_foot">
+    <mu1>100</mu1>
+    <mu2>100</mu2>
     <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
-    <kp>100000.0</kp>
-    <kd>1.0</kd>
-    <mu1>38</mu1>
-    <mu2>38</mu2>
-    <maxVel>0.0</maxVel>
-    <minDepth>0</minDepth>
+    <kp value="1000000.0"/>
+    <kd value="1.0"/>
 
+    <collision>
+      <surface>
+        <contact>
+          <ode>
+            <min_depth>0.01</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
   </gazebo>
   <!-- RR leg -->
   <gazebo reference="RR_hip">
@@ -263,14 +284,21 @@
     <self_collide>0</self_collide>
   </gazebo>
   <gazebo reference="RR_foot">
+    <mu1>100</mu1>
+    <mu2>100</mu2>
     <self_collide>0</self_collide>
     <material>Gazebo/DarkGrey</material>
-    <kp>100000.0</kp>
-    <kd>1.0</kd>
-    <mu1>38</mu1>
-    <mu2>38</mu2>
-    <maxVel>0.0</maxVel>
-    <minDepth>0</minDepth>
+    <kp value="1000000.0"/>
+    <kd value="1.0"/>
+    <collision>
+      <surface>
+        <contact>
+          <ode>
+            <min_depth>0.01</min_depth>
+          </ode>
+        </contact>
+      </surface>
+    </collision>
   </gazebo>
   <!-- Debug mode will hung up the robot, use "true" or "false" to switch it. -->
   <!-- <xacro:if value="$(arg DEBUG)">
