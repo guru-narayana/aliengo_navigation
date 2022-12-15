@@ -6,6 +6,7 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     std_msgs
     aliengo_kindym
+    aliengo_msgs
     tf
 )
 
@@ -23,3 +24,4 @@ add_dependencies(odometry nav_msgs_generate_messages_cpp)
 target_link_libraries(odometry   ${catkin_LIBRARIES})
 add_executable(footstep_state_publisher src/footstep_current_state_node.cpp)
 target_link_libraries(footstep_state_publisher   ${catkin_LIBRARIES})
+add_dependencies(footstep_state_publisher aliengo_msgs_generate_messages_cpp)
