@@ -200,9 +200,5 @@ All the parameters are located in the aliengo_utils package.
 
 
 # Final Result
-## Gait control
-![aliengo gait](https://github.com/guru-narayana/Aliengo_Nav-sim/blob/main/data/aliengo_gait.gif)
-## Navigation
-![aliengo navigation](https://github.com/guru-narayana/Aliengo_Nav-sim/blob/main/data/aliengo_navigation.gif)
-## Exploration
-![aliengo explore](https://github.com/guru-narayana/Aliengo_Nav-sim/blob/main/data/aliengo_explore.gif)
+## Stair climbing
+![Stair climbing](https://github.com/guru-narayana/Aliengo_Nav-sim/blob/main/data/aliengo_gait.gif)
