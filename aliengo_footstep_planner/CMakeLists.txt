@@ -35,3 +35,4 @@ include_directories(
 
 add_executable(quad_footstep_planner_node src/quad_footstep_planner_node.cpp src/quad_footstep_planner.cpp)
 target_link_libraries(quad_footstep_planner_node ${catkin_LIBRARIES} )
+add_dependencies(quad_footstep_planner_node aliengo_msgs_generate_messages_cpp)

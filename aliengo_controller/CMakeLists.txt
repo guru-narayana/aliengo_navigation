@@ -29,3 +29,4 @@ include_directories(
 
 add_executable(quad_controller_node src/controller.cpp src/shifting_control.cpp src/trot.cpp src/walk.cpp)
 target_link_libraries(quad_controller_node ${catkin_LIBRARIES} )
+add_dependencies(quad_controller_node aliengo_msgs_generate_messages_cpp)
