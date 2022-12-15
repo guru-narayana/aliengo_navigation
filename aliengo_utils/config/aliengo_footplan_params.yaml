@@ -7,7 +7,7 @@ Quad_footstep_planner:
   favoured_steplength : 0.09
   resolution_steplength : 0.01
   prefered_stepcostFactor : 3.5
-  obstacle_stepcostFactor : 0.0
+  obstacle_stepcostFactor : 0.01
   collision_costFactor : 1.2
   global_costFactor : 0.4
   edge_costFactor : 30
