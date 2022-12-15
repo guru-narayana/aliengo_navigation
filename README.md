@@ -201,4 +201,4 @@ All the parameters are located in the aliengo_utils package.
 
 # Final Result
 ## Stair climbing
-![Stair climbing](https://github.com/guru-narayana/Aliengo_Nav-sim/blob/main/data/aliengo_gait.gif)
+![Stair climbing](https://github.com/guru-narayana/aliengo_navigation/blob/main/data/stair.gif)
