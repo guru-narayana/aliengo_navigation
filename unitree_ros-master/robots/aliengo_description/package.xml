@@ -7,6 +7,7 @@
     <maintainer email="aliengo@unitree.cc">unitree</maintainer>
     <license>TODO</license>
 
+    <build_depend>aliengo_msgs</build_depend>
     <buildtool_depend>catkin</buildtool_depend>
     <depend>roscpp</depend>
     <depend>std_msgs</depend>
