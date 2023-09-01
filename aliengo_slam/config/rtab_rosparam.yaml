@@ -1,6 +1,6 @@
 rtabmap:
   rtabmap:
     Grid/FromDepth: true
-    Grid/MaxGroundHeight: 0.40 
+    Grid/MaxGroundHeight: 0.02
     Grid/MaxObstacleHeight: 2.0
     Grid/NormalsSegmentation: false

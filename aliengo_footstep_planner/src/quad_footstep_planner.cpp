@@ -97,10 +97,11 @@ void get_optim_vels(){
     double velx_incrm = max_forward_vel/(vx_samples-1),
             veltheta_incrm = (max_angular_vel-min_angular_vel)/(vtheta_samples-1),
             min_cost = 100000.0,optim_velx=0,optim_vely=0;
-    for(int vx_cnt = 0;vx_cnt<vx_samples;vx_cnt++){
-        for(int vt_cnt = 0;vt_cnt<vtheta_samples ;vt_cnt++){
-            joystick_vals[1] = (vx_cnt*velx_incrm)/max_forward_vel;
-            joystick_vals[0] = (min_angular_vel + vt_cnt*veltheta_incrm)/max_angular_vel;
+    make_plan();
+    for(int vx_cnt = 0;vx_cnt<3;vx_cnt++){
+        for(int vt_cnt = 0;vt_cnt<3 ;vt_cnt++){
+            joystick_vals[1] = min(max(((vx_cnt-1)*0.06 + prev_vx)/max_forward_vel,0.0),1.0);
+            joystick_vals[0] = min(max((prev_vtheta + (vt_cnt-1)*0.1)/max_angular_vel,-1.0),1.0);
             double cost = collision_check(true);
             if(min_cost>cost){
                 min_cost = cost;
@@ -109,20 +110,46 @@ void get_optim_vels(){
             }
         }
     }
+    prev_vx = optim_velx*max_forward_vel;
+    prev_vtheta = optim_vely*max_angular_vel;
     joystick_vals[0] = optim_vely;
     joystick_vals[1] = optim_velx;
 }
 
 double get_globalPlan_cost(double x,double y,int sample_points){
     double min_distance = 10000;
-    int val = min(sample_points , int(get_plan.response.plan.poses.size()));
-    for(int i=0; i<val;i++){
+    int start_index = 0;
+    
+    for(int i=0; i<get_plan.response.plan.poses.size();i++){
+        double distance = sqrt(pow((get_plan.response.plan.poses[i].pose.position.x - base_pose_x),2)+
+                                pow((get_plan.response.plan.poses[i].pose.position.y - base_pose_y),2));
+        if(distance<min_distance){
+            min_distance = distance;
+            start_index = i;
+        }
+    }
+    
+    min_distance = 10000;
+    int val = min(start_index + sample_points , int(get_plan.response.plan.poses.size()));
+    
+    if(int(get_plan.response.plan.poses.size())-start_index<10){
+        recived_global_plan = false;
+        std::cout<< "Goal Reached Ending session"<<std::endl;
+        return 0.0 ;
+    }
+    
+    for(int i=start_index; i<val;i++){
         double distance = sqrt(pow((get_plan.response.plan.poses[i].pose.position.x - x),2)+
-                                pow((get_plan.response.plan.poses[i].pose.position.y - y),2));
+                                pow((get_plan.response.plan.poses[i].pose.position.y - y),2)) + 0.05*abs(base_pose_yaw - atan2((get_plan.response.plan.poses[i+10].pose.position.y - get_plan.response.plan.poses[i].pose.position.y ),(get_plan.response.plan.poses[i+10].pose.position.x - get_plan.response.plan.poses[i].pose.position.x)))
+                            - 0.5*sqrt(pow((base_pose_x - x),2)+
+                                pow((base_pose_y - y),2));
+        cout<<"angular distance : "<< 0.005*abs(base_pose_yaw - atan2((get_plan.response.plan.poses[i+10].pose.position.y - get_plan.response.plan.poses[i].pose.position.y ),(get_plan.response.plan.poses[i+10].pose.position.x - get_plan.response.plan.poses[i].pose.position.x)))<<endl;
+
         if(distance<min_distance){
             min_distance = distance;
         }
     }
+
     return min_distance;
 }
 
@@ -156,8 +183,7 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
         secs =ros::WallTime::now();
 
         double collision_cost = collision_check(false);
-        std::cout << std::setprecision(2);
-        cout<<"Collision Time  "<<(ros::WallTime::now() - secs).toNSec() * 1e-6;
+        //cout<<"Collision Time  "<<(ros::WallTime::now() - secs).toNSec() * 1e-6;
 
         if(collision_cost>collision_threshold){
             transn_footholds.vel1 = 0.0;
@@ -218,8 +244,7 @@ void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::
             RR_foot_holds1.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RR_0,2)[0]);
             RL_foot_holds1.push_back(next_step(R, theta1, v, w, base_x, base_y, beta, RL_0,3)[0]);
         }
-        std::cout << std::setprecision(2);
-        cout<<"      foothold time "<< (ros::WallTime::now() - secs).toNSec() * 1e-6<<endl;
+       // cout<<"      foothold time "<< (ros::WallTime::now() - secs).toNSec() * 1e-6<<endl;
 
         
         transn_footholds.FL1.x = FL_foot_holds1[0][0];
@@ -352,6 +377,7 @@ double collision_check(bool return_totalcost){
     int total_points = 1;
     int collision_points = 0;
     double init_height = 0;
+    double gblx,gbly;
     for (int i=0;i<=sample_points;i++){
         bool collision(false);
         double t = i*time_period/sample_points;
@@ -402,14 +428,17 @@ double collision_check(bool return_totalcost){
             total_points+=1;
 
         }
-
+        if (i<=2 && return_totalcost){
+            gblx = fx;
+            gbly = fy;
+        }
         if((total_points-collision_points)*100/total_points < collision_free_threshold){
             for(int j=i;j<=sample_points;j++) collision_cost += (1/pow(2,j));
-            if(return_totalcost) return collision_cost*100*collision_costFactor + global_costFactor*get_globalPlan_cost(fx,fy,sample_points);
+            if(return_totalcost) return collision_cost*100*collision_costFactor + global_costFactor*get_globalPlan_cost(gblx,gbly,sample_points);
             return collision_cost*100;
         }
     }
-    if(return_totalcost) return collision_cost*100*collision_costFactor + global_costFactor*get_globalPlan_cost(fx,fy,sample_points);
+    if(return_totalcost) return collision_cost*100*collision_costFactor + global_costFactor*get_globalPlan_cost(gblx,gbly,sample_points);
     return collision_cost;
 }
 

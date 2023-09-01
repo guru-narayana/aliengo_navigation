@@ -1,0 +1,28 @@
+robot_config:
+  base_length: 0.556
+  base_width: 0.176
+  L1:  0.099
+  L2: 0.28
+  L3: 0.302
+  collision_rect_length: 0.75
+  collision_rect_width: 0.50
+  collision_point_height: 0.2
+  collision_threshold: 0.01
+  collision_free_threshold: 99.5
+  max_forward_vel:  0.18
+  min_angular_vel: -0.2
+  max_angular_vel: 0.2
+  robot_base_frame: base
+  foot_radius: 0.0265
+  robot_name: dogbot
+
+Quad_controller:
+  robot_verti_vel: 0.2
+  robot_base_height: 0.45
+  robot_swing_height: 0.05
+  controller_rate: 3000
+  walk_swing_time: 0.4
+  walk_base_time: 0.8
+  offset_velocity: 0.07
+  minimum_steplength: 0.04
+  favoured_steplength: 0.06

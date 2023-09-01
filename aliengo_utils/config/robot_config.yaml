@@ -14,3 +14,15 @@ robot_config:
   max_angular_vel: 0.1
   robot_base_frame: base
   foot_radius: 0.0265
+  robot_name: aliengo
+
+Quad_controller:
+    robot_verti_vel: 0.3
+    robot_base_height: 0.35
+    robot_swing_height: 0.05
+    controller_rate: 2000
+    walk_swing_time: 0.6
+    walk_base_time: 0.4
+    offset_velocity: 0.02
+    minimum_steplength: 0.02
+    favoured_steplength: 0.05

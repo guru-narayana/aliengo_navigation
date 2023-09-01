@@ -17,12 +17,14 @@
 #include "aliengo_msgs/transition_foothold.h"
 #include <geometry_msgs/PointStamped.h>
 #include <tf/transform_listener.h>
+#include <sensor_msgs/Joy.h>
 
 
 using namespace std;
 
 extern vector<double> robot_config;
 extern string robot_base_frame;
+extern string robot_name;
 extern double robot_verti_vel;
 extern double robot_base_height;
 extern double robot_swing_height;
@@ -37,6 +39,8 @@ extern double stance_time;
 extern double swing_time;
 extern double walk_base_time;
 extern double favoured_steplength;
+extern double offset_vel;
+extern double minimum_steplength;
 extern double max_forward_vel;
 extern double max_angular_vel;
 

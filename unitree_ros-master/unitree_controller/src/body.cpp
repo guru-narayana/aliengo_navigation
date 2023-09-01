@@ -19,17 +19,17 @@ void paramInit()
         lowCmd.motorCmd[i*3+0].mode = 0x0A;
         lowCmd.motorCmd[i*3+0].Kp = 240;
         lowCmd.motorCmd[i*3+0].dq = 0;
-        lowCmd.motorCmd[i*3+0].Kd = 3;
+        lowCmd.motorCmd[i*3+0].Kd = 7;
         lowCmd.motorCmd[i*3+0].tau = 0;
         lowCmd.motorCmd[i*3+1].mode = 0x0A;
-        lowCmd.motorCmd[i*3+1].Kp = 600;
+        lowCmd.motorCmd[i*3+1].Kp = 300;
         lowCmd.motorCmd[i*3+1].dq = 0;
-        lowCmd.motorCmd[i*3+1].Kd = 8;
+        lowCmd.motorCmd[i*3+1].Kd = 22;
         lowCmd.motorCmd[i*3+1].tau = 0;
         lowCmd.motorCmd[i*3+2].mode = 0x0A;
-        lowCmd.motorCmd[i*3+2].Kp = 600;
+        lowCmd.motorCmd[i*3+2].Kp = 300;
         lowCmd.motorCmd[i*3+2].dq = 0;
-        lowCmd.motorCmd[i*3+2].Kd = 15;
+        lowCmd.motorCmd[i*3+2].Kd = 22;
         lowCmd.motorCmd[i*3+2].tau = 0;
     }
     for(int i=0; i<12; i++){

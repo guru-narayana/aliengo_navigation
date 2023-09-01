@@ -5,6 +5,7 @@
 // Global params
 vector<double> robot_config = {0,0,0,0,0};
 string robot_base_frame;
+string robot_name;
 double robot_verti_vel;
 double robot_base_height;
 double robot_swing_height;
@@ -17,7 +18,9 @@ double walk_marigin;
 double walk_mariginx;
 double swing_time;
 double walk_base_time;
-double favoured_steplength =0.03;
+double favoured_steplength =0.08;
+double offset_vel =0.06;
+double minimum_steplength =0.02;
 double max_forward_vel;
 double max_angular_vel;
 //Regular updated params
@@ -34,7 +37,8 @@ aliengo_msgs::transition_foothold foot_holds;
 
 //conditional params
 bool nrecvd_callback1 = true,nrecvd_callback2 = true,nrecvd_callback3 = true;
-bool walk = true;
+bool walk = false;
+bool walking = true;
 
 
 
@@ -116,21 +120,20 @@ void get_params(ros::NodeHandle& nh){
     nh.param("/robot_config/L3",robot_config[4], 0.25);
     nh.param("/robot_config/toe_radius",toe_radius, 0.0265);
     nh.param("/robot_config/robot_base_frame",robot_base_frame,  string("/base"));
+    nh.param("/robot_config/robot_name",robot_name,  string("dogbot"));
     nh.param("/robot_config/max_forward_vel",max_forward_vel,  0.18);
     nh.param("/robot_config/max_angular_vel",max_angular_vel, 0.872); // rad/s
     nh.param("/robot_config/walk",walk, true);   
 
-
     nh.param("robot_verti_vel",robot_verti_vel, 0.1);
-    nh.param("robot_base_height",robot_base_height, 0.31);
-    nh.param("robot_swing_height",robot_swing_height, 0.04);
-    nh.param("controller_rate",controller_rate, 500);
-
-    nh.param("walk_mariginy",walk_marigin, 0.07);
-    nh.param("walk_mariginx",walk_mariginx, 0.0);
-    nh.param("walk_swing_time",swing_time, 0.35);
+    nh.param("robot_base_height",robot_base_height, 0.43);
+    nh.param("robot_swing_height",robot_swing_height, 0.03);
+    nh.param("controller_rate",controller_rate, 1000);
+    nh.param("walk_swing_time",swing_time, 0.3);
     nh.param("walk_base_time",walk_base_time, 0.5);
-    //nh.param("favoured_steplength", favoured_steplength, 0.07);
+    nh.param("offset_velocity",offset_vel, 0.06);
+    nh.param("minimum_steplength",minimum_steplength, 0.02);
+    nh.param("favoured_steplength",favoured_steplength, 0.07);
 
 }
 double get_vince(vector<double> arr){
@@ -171,7 +174,7 @@ int main(int argc,char** argv){
     ros::Duration(0.5).sleep();
     ros::spinOnce();
     tf::TransformListener listener;
-    nh.param("/robot_config/walk",walk, true);   
+    //nh.param("/robot_config/walk",walk, true);   
     ros::Duration(1.5).sleep();
 
     while(ros::ok()){
@@ -182,27 +185,41 @@ int main(int argc,char** argv){
         listener.lookupTransform("/map", "/RR_foot",ros::Time(0), RR_tf);
         
         double cost = foot_holds.Future_planarcost;
+        nh.param("/robot_config/walk",walk, true);   
+
         if(!foot_holds.collision_halt && !nrecvd_callback3){
             
             //cout<<foot_holds.Future_planarcost<<endl;
-            vector<double> variance_arr = {FL_tf.getOrigin().z(), FR_tf.getOrigin().z(), RL_tf.getOrigin().z(), RR_tf.getOrigin().z()};
-            cout<<get_vince(variance_arr)<<"  "<<cost<<endl;
+            // vector<double> variance_arr = {FL_tf.getOrigin().z(), FR_tf.getOrigin().z(), RL_tf.getOrigin().z(), RR_tf.getOrigin().z()};
+            // cout<<get_vince(variance_arr)<<"  "<<cost<<endl;
 
-            if(cost>0.01 && walk==false){
-                ros::Duration(1.5).sleep();
+            // if(get_vince(variance_arr)< 0.0002 && walk==false){
+            //     ros::Duration(1.5).sleep();
+            //     shift_mode(jnt_st_pub);
+            //     height_adjust(jnt_st_pub);
+            //     walk=true;
+            // }
+            // else if(cost<=0.01 && walk==true && get_vince(variance_arr)< 0.0002){
+            //     
+            //     ros::Duration(0.5).sleep();
+            //     walk=false;
+            // }
+            
+            if(walk && walking) walk_a_step(jnt_st_pub,listener);
+            else if (walk && !walking)
+            {
                 shift_mode(jnt_st_pub);
-                //height_adjust(jnt_st_pub);
-                walk=true;
-            }
-            else if(cost<=0.01 && walk==true && get_vince(variance_arr)< 0.002){
-                //shift_mode(jnt_st_pub);
-                ros::Duration(0.5).sleep();
-                walk=false;
+                walking = true;
             }
             
-            if(walk) walk_a_step(jnt_st_pub,listener);
-            else trot_a_step(jnt_st_pub);
-
+            else if (!walk && walking){
+                shift_mode(jnt_st_pub);
+                walking = false;
+            }
+            else{
+                trot_a_step(jnt_st_pub);
+            }
+            //trot_a_step(jnt_st_pub);
             nrecvd_callback3= true;
         }
 

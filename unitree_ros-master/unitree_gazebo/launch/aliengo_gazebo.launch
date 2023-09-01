@@ -12,7 +12,7 @@
     <arg name="user_debug" default="false"/>
     
     <include file="$(find gazebo_ros)/launch/empty_world.launch">
-        <arg name="world_name" value="$(find unitree_gazebo)/worlds/$(arg wname).world"/>
+        <arg name="world_name" value="worlds/empty.world"/>
         <arg name="debug" value="$(arg debug)"/>
         <arg name="gui" value="$(arg gui)"/>
         <arg name="paused" value="true"/>
@@ -27,7 +27,7 @@
     <!-- Run a python script to the send a service call to gazebo_ros to spawn a URDF robot -->
     <!-- Set trunk and joint positions at startup -->
     <node pkg="gazebo_ros" type="spawn_model" name="urdf_spawner" respawn="false" output="screen"
-          args="-urdf -x -8.0 -y 0.0 -z 0.4 -model $(arg rname)_gazebo -param robot_description -unpause"/>
+          args="-urdf -x -1.0 -y 0.0 -z 0.5 -model $(arg rname)_gazebo -param robot_description -unpause"/>
 
     <!-- Load joint controller configurations from YAML file to parameter server -->
     <rosparam file="$(arg dollar)$(arg robot_path)/config/robot_control.yaml" command="load"/>

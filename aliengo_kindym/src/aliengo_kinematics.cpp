@@ -31,6 +31,11 @@ vector<double> quad_kinem::BaseToRR(vector<double> xyz_base){
 }
 
 
+
+
+
+
+
 vector<double> quad_kinem::FLToBase(vector<double> xyz_base){
     vector<double> xyz = {xyz_base[2]+Length/2,xyz_base[1]+width/2,-xyz_base[0]};
     return xyz;

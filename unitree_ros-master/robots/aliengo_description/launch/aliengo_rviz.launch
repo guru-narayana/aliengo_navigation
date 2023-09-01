@@ -1,5 +1,6 @@
 <launch>
-
+  <arg
+    name="aliengo_gazebo" />
     <arg name="user_debug" default="false"/>
     <param name="robot_description" textfile="$(find aliengo_description)/xacro/aliengo.urdf" />
 
@@ -7,9 +8,10 @@
     <!-- <param name="rate" value="1000"/> -->
 
     <!-- send fake joint values -->
-    <node pkg="joint_state_publisher" type="joint_state_publisher" name="joint_state_publisher">
-        <param name="use_gui" value="TRUE"/>
-    </node>
+    <node
+        name="joint_state_publisher_gui"
+        pkg="joint_state_publisher_gui"
+        type="joint_state_publisher_gui" />
 
     <node pkg="robot_state_publisher" type="robot_state_publisher" name="robot_state_publisher">
         <param name="publish_frequency" type="double" value="1000.0"/>

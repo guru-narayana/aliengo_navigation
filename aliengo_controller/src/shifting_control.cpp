@@ -190,17 +190,18 @@ void shift_mode(ros::Publisher jnt_st_pub){
                     endpnt_RL = {-robot_config[0]/2,((robot_config[1]/2) + robot_config[2]),-robot_base_height},
                     endpnt_FR = {robot_config[0]/2,-((robot_config[1]/2) + robot_config[2]),-robot_base_height},
                     endpnt_RR = {-robot_config[0]/2,-((robot_config[1]/2) + robot_config[2]),-robot_base_height};
-    double T = 0.2;
+    double T = 0.3;
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
 
     vector<vector<double>> A_FL = generate_swing_coefs(current_robot_footsteps[0],endpnt_FL), 
                             A_FR = generate_swing_coefs(current_robot_footsteps[1],endpnt_FR), 
                             A_RL = generate_swing_coefs(current_robot_footsteps[2],endpnt_RL), 
                             A_RR = generate_swing_coefs(current_robot_footsteps[3],endpnt_RR);    
-    double init_time = ros::Time::now().toSec();
     ros::Rate frequency(controller_rate);
-    while(ros::Time::now().toSec()-init_time<=T && ros::ok()){
+    double init_time = ros::Time::now().toSec();
+    while(ros::Time::now().toSec()-init_time<=(T+0.0005) && ros::ok()){
         double u = (ros::Time::now().toSec()-init_time)/T;
+        u = min(1.0,u);
         vector<vector<double>> u_mat = {{1,u,pow(u,2)}};
         vector<vector<double>> FL_cnt_pos = Multiply(u_mat,A_FL),
                                 RR_cnt_pos = Multiply(u_mat,A_RR);
@@ -216,10 +217,11 @@ void shift_mode(ros::Publisher jnt_st_pub){
         frequency.sleep();
         ros::spinOnce();
     }
-    init_time = ros::Time::now().toSec();
     A_RL = generate_swing_coefs(current_robot_footsteps[2],endpnt_RL); A_FR = generate_swing_coefs(current_robot_footsteps[1],endpnt_FR);   
-    while(ros::Time::now().toSec()-init_time<=T && ros::ok()){
+    init_time = ros::Time::now().toSec();
+    while(ros::Time::now().toSec()-init_time<=(T + 0.0005) && ros::ok()){
         double u = (ros::Time::now().toSec()-init_time)/T;
+        u = min(1.0,u);
         vector<vector<double>> u_mat = {{1,u,pow(u,2)}};
         vector<vector<double>> FR_cnt_pos = Multiply(u_mat,A_FR),
                                 RL_cnt_pos = Multiply(u_mat,A_RL);

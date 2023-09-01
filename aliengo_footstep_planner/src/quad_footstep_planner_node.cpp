@@ -27,6 +27,9 @@ int vx_samples;
 vector<double> robot_config = {0,0,0,0,0};
 int contacts = 0; 
 
+
+double prev_vx = 0.0;
+double prev_vtheta = 0.0;
 double collision_rect_length;
 double collision_rect_width;
 double collision_point_height;
@@ -51,7 +54,8 @@ string grid_map_topic;
 string joystick_topic;
 bool using_joystick;
 
-
+bool joy1 = false;
+bool joy2 = false;
 // global update params
 GridMap elev_map;
 double joystick_vals[] = {0.0,0.0};
@@ -67,7 +71,10 @@ void joy_cb(const sensor_msgs::Joy::ConstPtr& msg)
 {
     joystick_vals[0] = msg->axes[0]; 
     joystick_vals[1] = msg->axes[1];
-
+    joy1 = false;
+    joy2 = false;
+    if(msg->buttons[0]) joy1 = true;
+    if(msg->buttons[1]) joy2 = true;
     
 }
 
@@ -112,7 +119,13 @@ void base_pose_cb(const geometry_msgs::PoseWithCovarianceStamped& msg){
     start.header = msg.header;
     start.pose = msg.pose.pose;
 }
-
+void make_plan(){
+    get_plan.request.start = start;
+    if (!client.call(get_plan))
+    {
+        ROS_ERROR("Failed to call service make_plan");
+    }
+}
 void goal_pose_cb(const geometry_msgs::PoseStamped& goal){
     recived_global_plan = true;
     get_plan.request.start = start;
@@ -175,7 +188,7 @@ int main(int argc, char** argv)
     ros::Subscriber goal_pose_sub = nh.subscribe(goal_topic, 1, goal_pose_cb);
 
 
-    client = nh.serviceClient<nav_msgs::GetPlan>("/move_base/NavfnROS/make_plan");
+    client = nh.serviceClient<nav_msgs::GetPlan>("/planner/move_base/NavfnROS/make_plan");
     
 
     ros::Publisher poly_pub = nh.advertise<geometry_msgs::PolygonStamped>("/poly",1);
@@ -188,8 +201,15 @@ int main(int argc, char** argv)
     while (ros::ok()){
         ros::spinOnce();
         get_params(nh);
-        if(map_available && (contacts >= 2)){
+        if(joy1) nh.setParam("/robot_config/walk",true);
+        if(joy2) nh.setParam("/robot_config/walk",false);
+        if(map_available && (contacts >= 0)){
+        try{
         plan_footsteps(poly_pub,foot_marker_pub,next_foot_pub);
+        }
+        catch (const char* e) {  
+        std::cerr << e << std::endl;  
+        }  
         loop_rate.sleep();
 
     }}

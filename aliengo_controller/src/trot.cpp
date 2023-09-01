@@ -11,8 +11,8 @@ void trot_a_step(ros::Publisher jnt_st_pub){
     quad_kinem quad_kinem_g(robot_config[2],robot_config[3],robot_config[4],robot_config[0],robot_config[1]);
     double R(sqrt(pow((robot_config[0])/2,2)+pow((robot_config[1] + 2*robot_config[2])/2,2))),
             theta(atan((robot_config[0])/(robot_config[1] + 2*robot_config[2])));
-    double v = max(foot_holds.vel1,0.0),w = foot_holds.vel2,
-           SL = max(favoured_steplength*(v/max_forward_vel),0.021),
+    double v = max(foot_holds.vel1,offset_vel),w = foot_holds.vel2,
+           SL = max(favoured_steplength*(v/max_forward_vel),minimum_steplength),
             alpha = 2*asin(SL/(2*R)),
             vr = (SL*w)/alpha,
             freq = sqrt(9.81/robot_base_height);
@@ -43,7 +43,7 @@ void trot_a_step(ros::Publisher jnt_st_pub){
         vector<double> FR = {FR0[0] + SL*sin(thetaFR1)-FR_init[0],FR0[1] + SL*cos(thetaFR1)-FR_init[1]},
                         RL = {RL0[0] + SL*sin(thetaRL1)-RL_init[0],RL0[1] + SL*cos(thetaRL1)-RL_init[1]};
 
-        double T = max(min(SL/sqrt( pow(v + vr*sin(thetaFR),2) + pow(vr*cos(thetaFR),2)),0.3),0.05);
+        double T = max(min(SL/sqrt( pow(v + vr*sin(thetaFR),2) + pow(vr*cos(thetaFR),2)),0.3),0.005);
         vector<vector<double>> A_fl = generate_swing_coefs(FL_init,FL0),
                                 A_rr = generate_swing_coefs(RR_init,RR0);
         double init_time = ros::Time::now().toSec();
@@ -53,8 +53,8 @@ void trot_a_step(ros::Publisher jnt_st_pub){
             vector<vector<double>> u_mat = {{1,u,pow(u,2)}};
             vector<vector<double>> FL_cnt_pos = Multiply(u_mat,A_fl),
                                     RR_cnt_pos = Multiply(u_mat,A_rr);
-                     vector<double> FR_cnt_pos = {FR_init[0]-FR[0]*(sin(freq*t)/sin(freq*T)),FR_init[1]-FR[1]*(sin(freq*t)/sin(freq*T)),-robot_base_height},
-                                    RL_cnt_pos = {RL_init[0]-RL[0]*(sin(freq*t)/sin(freq*T)),RL_init[1]-RL[1]*(sin(freq*t)/sin(freq*T)),-robot_base_height};
+                     vector<double> FR_cnt_pos = {FR_init[0]-FR[0]*(sin(M_PI_2*u)),FR_init[1]-FR[1]*(sin(M_PI_2*u)),-robot_base_height},
+                                    RL_cnt_pos = {RL_init[0]-RL[0]*(sin(M_PI_2*u)),RL_init[1]-RL[1]*(sin(M_PI_2*u)),-robot_base_height};
                     vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(FL_cnt_pos[0])),
                             RR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToRR(RR_cnt_pos[0])),
                             FR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToFR(FR_cnt_pos)),
@@ -98,7 +98,7 @@ void trot_a_step(ros::Publisher jnt_st_pub){
                 thetaFL1 = atan2((v + vr*sin(thetaFL)),(vr*cos(thetaFL)));
         vector<double> FL = {FL0[0] + SL*sin(thetaFL1)-FL_init[0],FL0[1] + SL*cos(thetaFL1)-FL_init[1]},
                         RR = {RR0[0] + SL*sin(thetaRR1)-RR_init[0],RR0[1] + SL*cos(thetaRR1)-RR_init[1]};
-        double T = max(min(SL/sqrt(pow(v + vr*sin(thetaFL),2)+pow(vr*cos(thetaFL),2)),0.3),0.05);
+        double T = max(min(SL/sqrt(pow(v + vr*sin(thetaFL),2)+pow(vr*cos(thetaFL),2)),0.3),0.005);
         vector<vector<double>> A_fr = generate_swing_coefs(FR_init,FR0),
                                 A_rl = generate_swing_coefs(RL_init,RL0);
         double init_time = ros::Time::now().toSec();
@@ -108,8 +108,8 @@ void trot_a_step(ros::Publisher jnt_st_pub){
             vector<vector<double>> u_mat = {{1,u,pow(u,2)}};
             vector<vector<double>> FR_cnt_pos = Multiply(u_mat,A_fr),
                                     RL_cnt_pos = Multiply(u_mat,A_rl);
-                     vector<double> FL_cnt_pos = {FL_init[0]-FL[0]*(sin(freq*t)/sin(freq*T)),FL_init[1]-FL[1]*(sin(freq*t)/sin(freq*T)),-robot_base_height},
-                                    RR_cnt_pos = {RR_init[0]-RR[0]*(sin(freq*t)/sin(freq*T)),RR_init[1]-RR[1]*(sin(freq*t)/sin(freq*T)),-robot_base_height};
+                     vector<double> FL_cnt_pos = {FL_init[0]-FL[0]*sin(M_PI_2*u),FL_init[1]-FL[1]*(sin(M_PI_2*u)),-robot_base_height},
+                                    RR_cnt_pos = {RR_init[0]-RR[0]*sin(M_PI_2*u),RR_init[1]-RR[1]*(sin(M_PI_2*u)),-robot_base_height};
                     vector<double> FL_req_jnt = quad_kinem_g.Left_Leg_IK(quad_kinem_g.BaseToFL(FL_cnt_pos)),
                             RR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToRR(RR_cnt_pos)),
                             FR_req_jnt = quad_kinem_g.Right_Leg_IK(quad_kinem_g.BaseToFR(FR_cnt_pos[0])),

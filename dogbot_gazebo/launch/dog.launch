@@ -1,0 +1,67 @@
+
+<launch>
+    <param name="robot_description"
+           textfile="$(find dogbot_description)/urdf/dogbot.urdf"/>
+
+    <arg name="use_sim_time" default="true"/>
+    <arg name="gui" default="true"/>
+    <arg name="headless" default="false"/>
+    <arg name="debug" default="false"/>
+
+
+    <include file="$(find gazebo_ros)/launch/empty_world.launch">
+        <arg name="world_name" value="worlds/office_small.world"/>
+        <arg name="gui" value="$(arg gui)"/>
+        <arg name="paused" value="true"/>
+        <arg name="use_sim_time" value="$(arg use_sim_time)"/>
+        <arg name="headless" value="$(arg headless)"/>
+    </include>
+
+
+    <node pkg="gazebo_ros" type="spawn_model" name="urdf_spawner" respawn="false" output="screen"
+        args="-urdf -x 0.0 -y -1.0 -z 0.6  -model dogbot -param robot_description
+        -J front_left_roll_joint 0.0
+        -J front_left_pitch_joint -0.74
+        -J front_left_knee_joint -1.42
+        -J front_right_roll_joint 0.0
+        -J front_right_pitch_joint 0.74
+        -J front_right_knee_joint 1.42
+        -J back_left_roll_joint 0.0
+        -J back_left_pitch_joint -0.74
+        -J back_left_knee_joint -1.42
+        -J back_right_roll_joint 0.0
+        -J back_right_pitch_joint 0.74
+        -J back_right_knee_joint 1.42
+        "/>
+  
+  <rosparam file="$(find dogbot_gazebo)/config/dogbot_control.yaml" command="load" />
+
+    <node pkg="controller_manager" type="spawner" name="controller_spawner" respawn="false"
+        output="screen" ns="/dogbot" args="
+      
+      joint_state_controller
+      
+      front_right_roll_position_controller 
+      front_right_pitch_position_controller 
+      front_right_knee_position_controller
+
+      front_left_roll_position_controller 
+      front_left_pitch_position_controller 
+      front_left_knee_position_controller
+      
+      back_right_roll_position_controller 
+      back_right_pitch_position_controller 
+      back_right_knee_position_controller
+      
+      back_left_roll_position_controller 
+      back_left_pitch_position_controller 
+      back_left_knee_position_controller
+      "/> 
+    
+    <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" output="screen">
+      <param name="publish_frequency" value="100"/>
+      <param name="use_tf_static"     value="false"/>
+      <remap from="joint_states"      to="dogbot/joint_states"/>
+    </node>
+
+</launch>

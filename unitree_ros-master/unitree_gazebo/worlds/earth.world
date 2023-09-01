@@ -148,6 +148,7 @@
                 </visual>
             </link>
     </model> -->
+    
     <include>
         <uri>model://stairs</uri>
     </include>

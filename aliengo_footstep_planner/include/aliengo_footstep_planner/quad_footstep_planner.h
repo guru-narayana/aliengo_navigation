@@ -48,7 +48,8 @@ extern string robot_base_frame;
 extern bool using_joystick;
 extern int vx_samples;
 extern int vtheta_samples;
-
+extern double prev_vx;
+extern double prev_vtheta;
 // result data
 extern vector<vector<double>> foot_steps;
 extern bool collision_detected;
@@ -66,6 +67,7 @@ extern nav_msgs::GetPlan get_plan;
 void plan_footsteps(ros::Publisher poly_pub,ros::Publisher foot_marker_pub,ros::Publisher next_step_pub);
 double collision_check(bool return_totalcost);
 void update_planar_variance();
+void make_plan();
 vector<vector<double>> foot_end_points();
 vector<double> calc_omega_EP_angles(double step_length);
 

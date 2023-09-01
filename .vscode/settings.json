@@ -25,6 +25,15 @@
         "tuple": "cpp",
         "chrono": "cpp",
         "limits": "cpp",
-        "valarray": "cpp"
-    }
+        "valarray": "cpp",
+        "any": "cpp",
+        "optional": "cpp",
+        "variant": "cpp",
+        "bitset": "cpp",
+        "utility": "cpp"
+    },
+    "python.analysis.extraPaths": [
+        "/home/guru/catkin_ws/devel/lib/python3/dist-packages",
+        "/opt/ros/noetic/lib/python3/dist-packages"
+    ]
 }

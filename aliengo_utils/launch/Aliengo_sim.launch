@@ -7,7 +7,8 @@
     <node name="rviz" pkg="rviz" type="rviz" args="-d $(find aliengo_slam)/rviz/slam_with_elev.rviz">
         <remap from="/move_base_simple/goal" to="/aliengo_goal"/>
      </node>
-    
+    <rosparam command="load" file="$(find aliengo_utils)/config/aliengo_footplan_params.yaml"/>
+    <rosparam command="load" file="$(find aliengo_utils)/config/robot_config.yaml"/>
      <node name="footstep_state_publisher" pkg="aliengo_description" type="footstep_state_publisher" output="screen">
      </node>
 </launch>
