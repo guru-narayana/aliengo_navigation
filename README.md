@@ -5,6 +5,24 @@
 
 # Introduction
 This work presents software stack for indoor Vision-based Quadrupedal Locomotion. It integrates existing technology in Simultaneous Localisation and Mapping (SLAM), global path planning, and composite COG Trajectory planning methods to achieve both autonomous and semi-autonomous Quadrupedal Locomotion. The work is currently tested in simulation with Unitree’s Alien go Robot and can be extended to reality. Unlike the existing SDK, this software presents all in one solution to locomotion problems, including vision-based foothold planning and obstacle avoidance. The modular architecture of the Software allows various controller implementations
+# Publication
+If you use this work in an academic context, please cite the following publications as relevant:
+
+N. G. Narayanaswamy and F. Kanehiro, "Vision-Based Software System for Indoor Quadrupedal Locomotion: Integrated with SLAM, Foothold Planning, and Multimodal Gait," 2024 IEEE/SICE International Symposium on System Integration (SII)
+```
+@INPROCEEDINGS{10417432,
+  author={Narayanaswamy, Nara Guru and Kanehiro, Fumio},
+  booktitle={2024 IEEE/SICE International Symposium on System Integration (SII)}, 
+  title={Vision-Based Software System for Indoor Quadrupedal Locomotion: Integrated with SLAM, Foothold Planning, and Multimodal Gait}, 
+  year={2024},
+  volume={},
+  number={},
+  pages={1330-1335},
+  keywords={Simultaneous localization and mapping;Trajectory planning;Computer architecture;Software systems;Stability analysis;Planning;Quadrupedal robots},
+  doi={10.1109/SII58957.2024.10417432}}
+```
+
+
 
 # Dependencies
 * [ROS](https://www.ros.org/)
